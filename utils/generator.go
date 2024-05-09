@@ -12,7 +12,11 @@ func GenerateID(length int) int {
 	}
 	var id string
 	for i := 0; i < length; i++ {
-		id += strconv.Itoa(rand.Intn(10))
+		if i == 0 {
+			id += strconv.Itoa(rand.Intn(9) + 1)
+		} else {
+			id += strconv.Itoa(rand.Intn(10))
+		}
 	}
 	idInt, _ := strconv.Atoi(id)
 	return idInt
