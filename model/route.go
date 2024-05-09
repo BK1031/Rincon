@@ -1,9 +1,11 @@
 package model
 
+import "time"
+
 type Route struct {
-	Route       string `json:"route" gorm:"primaryKey"`
-	ServiceName string `json:"service_name"`
-	CreatedAt   string `json:"created_at" gorm:"autoCreateTime"`
+	Route       string    `json:"route" gorm:"primaryKey"`
+	ServiceName string    `json:"service_name"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 }
 
 func (Route) TableName() string {
@@ -11,10 +13,10 @@ func (Route) TableName() string {
 }
 
 type RouteNode struct {
-	ID          string `json:"id" gorm:"primaryKey"`
-	Path        string `json:"path"`
-	ServiceName string `json:"service_name"`
-	CreatedAt   string `json:"created_at" gorm:"autoCreateTime"`
+	ID          string    `json:"id" gorm:"primaryKey"`
+	Path        string    `json:"path"`
+	ServiceName string    `json:"service_name"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 }
 
 func (RouteNode) TableName() string {

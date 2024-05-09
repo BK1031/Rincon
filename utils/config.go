@@ -1,6 +1,9 @@
 package utils
 
-import "rincon/config"
+import (
+	"rincon/config"
+	"strconv"
+)
 
 func VerifyConfig() {
 	if config.Env == "" {
@@ -20,6 +23,14 @@ func VerifyConfig() {
 		SugarLogger.Debugln("AUTH_PASSWORD is not set, defaulting to admin")
 	}
 
+	if config.ServiceIDLength == "" {
+		config.ServiceIDLength = "6"
+		SugarLogger.Debugln("SERVICE_ID_LENGTH is not set, defaulting to 6")
+	}
+	if i, err := strconv.Atoi(config.ServiceIDLength); i < 4 || err != nil {
+		config.ServiceIDLength = "4"
+		SugarLogger.Debugln("SERVICE_ID_LENGTH is less than 4, defaulting to 4")
+	}
 	if config.StorageMode == "sql" {
 		verifySql()
 	} else if config.StorageMode == "redis" {
