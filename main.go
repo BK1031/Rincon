@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"Rincon/config"
+	"Rincon/utils"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	config.PrintStartupBanner()
+	utils.InitializeLogger()
+	defer utils.Logger.Sync()
+
+	utils.VerifyConfig()
+
 }
