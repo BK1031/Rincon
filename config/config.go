@@ -15,6 +15,8 @@ var AuthPassword = os.Getenv("AUTH_PASSWORD")
 // It can be "local", "sql", "redis", 'redis+sql".
 var StorageMode = os.Getenv("STORAGE_MODE")
 
+// DatabaseDriver is the driver to use for the database.
+// It can be "mysql" or "postgres".
 var DatabaseDriver = os.Getenv("DB_DRIVER")
 var DatabaseHost = os.Getenv("DB_HOST")
 var DatabasePort = os.Getenv("DB_PORT")

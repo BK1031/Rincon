@@ -1,8 +1,9 @@
 package main
 
 import (
-	"Rincon/config"
-	"Rincon/utils"
+	"rincon/config"
+	"rincon/database"
+	"rincon/utils"
 )
 
 func main() {
@@ -11,5 +12,5 @@ func main() {
 	defer utils.Logger.Sync()
 
 	utils.VerifyConfig()
-
+	database.InitializeDB()
 }
