@@ -25,3 +25,13 @@ func TestGenerateID(t *testing.T) {
 		}
 	})
 }
+
+func TestNormalizeName(t *testing.T) {
+	t.Run("Test Normalize Name", func(t *testing.T) {
+		name := "Service Name"
+		normalized := NormalizeName(name)
+		if normalized != "Service_Name" {
+			t.Errorf("Service Name is not service_name")
+		}
+	})
+}

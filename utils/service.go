@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"rincon/config"
 	"strconv"
+	"strings"
 )
 
 func GenerateID(length int) int {
@@ -20,4 +21,8 @@ func GenerateID(length int) int {
 	}
 	idInt, _ := strconv.Atoi(id)
 	return idInt
+}
+
+func NormalizeName(name string) string {
+	return strings.ReplaceAll(name, " ", "_")
 }
