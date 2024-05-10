@@ -8,6 +8,7 @@ import (
 func TestVerifyConfig(t *testing.T) {
 	InitializeLogger()
 	t.Run("Test Blank Config", func(t *testing.T) {
+		config.Env = ""
 		VerifyConfig()
 		if config.Env != "PROD" {
 			t.Errorf("Env is not set to PROD")
