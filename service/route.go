@@ -6,6 +6,7 @@ import (
 	"rincon/database"
 	"rincon/model"
 	"rincon/utils"
+	"time"
 )
 
 func GetAllRoutes() []model.Route {
@@ -47,6 +48,7 @@ func CreateRoute(route model.Route) error {
 		return fmt.Errorf("service name cannot be empty")
 	}
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
+	route.CreatedAt = time.Now()
 
 	if GetRouteByID(route.Route).Route != "" && route.ServiceName != GetRouteByID(route.Route).ServiceName {
 		if config.OverwriteRoutes == "true" {
