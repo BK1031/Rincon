@@ -68,7 +68,7 @@ func CreateService(service model.Service) (model.Service, error) {
 	} else if service.HealthCheck == "" {
 		return model.Service{}, fmt.Errorf("service health check cannot be empty")
 	}
-	service.Name =
+	service.Name = utils.NormalizeName(service.Name)
 	var newService model.Service
 	existing := GetServiceByEndpoint(service.Endpoint)
 	if existing.Endpoint != "" {

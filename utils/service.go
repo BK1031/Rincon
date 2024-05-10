@@ -24,5 +24,5 @@ func GenerateID(length int) int {
 }
 
 func NormalizeName(name string) string {
-	return strings.ReplaceAll(name, " ", "_")
+	return strings.ToLower(strings.ReplaceAll(name, " ", "_"))
 }
