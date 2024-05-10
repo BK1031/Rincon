@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"rincon/database"
 	"rincon/model"
 	"rincon/utils"
@@ -8,9 +9,21 @@ import (
 )
 
 func GetAllServices() []model.Service {
-	var services []model.Service
+	services := make([]model.Service, 0)
 	services = database.Local.Services
 	return services
+}
+
+func GetNumServices() int {
+	return len(database.Local.Services)
+}
+
+func GetNumUniqueServices() int {
+	unique := make(map[string]bool)
+	for _, s := range database.Local.Services {
+		unique[s.Name] = true
+	}
+	return len(unique)
 }
 
 func GetServiceByID(id int) model.Service {
@@ -25,7 +38,7 @@ func GetServiceByID(id int) model.Service {
 }
 
 func GetServicesByName(name string) []model.Service {
-	var services []model.Service
+	services := make([]model.Service, 0)
 	for _, s := range database.Local.Services {
 		if s.Name == name {
 			services = append(services, s)
@@ -45,7 +58,18 @@ func GetServiceByEndpoint(endpoint string) model.Service {
 	return service
 }
 
-func CreateService(service model.Service) error {
+func CreateService(service model.Service) (model.Service, error) {
+	if service.Name == "" {
+		return model.Service{}, fmt.Errorf("service name cannot be empty")
+	} else if service.Version == "" {
+		return model.Service{}, fmt.Errorf("service version cannot be empty")
+	} else if service.Endpoint == "" {
+		return model.Service{}, fmt.Errorf("service endpoint cannot be empty")
+	} else if service.HealthCheck == "" {
+		return model.Service{}, fmt.Errorf("service health check cannot be empty")
+	}
+
+	var newService model.Service
 	existing := GetServiceByEndpoint(service.Endpoint)
 	if existing.Endpoint != "" {
 		existing.UpdatedAt = time.Now()
@@ -55,11 +79,13 @@ func CreateService(service model.Service) error {
 				break
 			}
 		}
+		newService = existing
 	} else {
 		service.ID = utils.GenerateID(0)
 		service.UpdatedAt = time.Now()
 		service.CreatedAt = time.Now()
 		database.Local.Services = append(database.Local.Services, service)
+		newService = service
 	}
-	return nil
+	return newService, nil
 }
