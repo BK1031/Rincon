@@ -39,3 +39,12 @@ func GetRoutesByServiceName(name string) []model.Route {
 func CreateRoute(route model.Route) {
 	database.Local.Routes = append(database.Local.Routes, route)
 }
+
+func DeleteRoute(id string) {
+	for i, r := range database.Local.Routes {
+		if r.Route == id {
+			database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
+			break
+		}
+	}
+}
