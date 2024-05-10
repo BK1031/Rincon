@@ -1,8 +1,11 @@
 package service
 
 import (
+	"fmt"
+	"rincon/config"
 	"rincon/database"
 	"rincon/model"
+	"rincon/utils"
 )
 
 func GetAllRoutes() []model.Route {
@@ -27,6 +30,7 @@ func GetRouteByID(id string) model.Route {
 }
 
 func GetRoutesByServiceName(name string) []model.Route {
+	name = utils.NormalizeName(name)
 	routes := make([]model.Route, 0)
 	for _, r := range database.Local.Routes {
 		if r.ServiceName == name {
@@ -36,8 +40,23 @@ func GetRoutesByServiceName(name string) []model.Route {
 	return routes
 }
 
-func CreateRoute(route model.Route) {
+func CreateRoute(route model.Route) error {
+	if route.Route == "" {
+		return fmt.Errorf("route cannot be empty")
+	} else if route.ServiceName == "" {
+		return fmt.Errorf("service name cannot be empty")
+	}
+	route.ServiceName = utils.NormalizeName(route.ServiceName)
+
+	if GetRouteByID(route.Route).Route != "" && route.ServiceName != GetRouteByID(route.Route).ServiceName {
+		if config.OverwriteRoutes == "true" {
+			DeleteRoute(route.Route)
+		} else {
+			return fmt.Errorf("route with id %s already exists", route.Route)
+		}
+	}
 	database.Local.Routes = append(database.Local.Routes, route)
+	return nil
 }
 
 func DeleteRoute(id string) {

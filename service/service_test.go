@@ -1,21 +1,11 @@
 package service
 
 import (
-	"os"
 	"rincon/database"
 	"rincon/model"
-	"rincon/utils"
 	"testing"
 	"time"
 )
-
-func TestMain(m *testing.M) {
-	utils.InitializeLogger()
-	utils.VerifyConfig()
-	database.InitializeLocal()
-	exitVal := m.Run()
-	os.Exit(exitVal)
-}
 
 func TestCreateServiceLocal(t *testing.T) {
 	t.Run("Test No Name", func(t *testing.T) {
