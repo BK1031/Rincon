@@ -72,14 +72,16 @@ func CreateService(service model.Service) (model.Service, error) {
 	var newService model.Service
 	existing := GetServiceByEndpoint(service.Endpoint)
 	if existing.Endpoint != "" {
-		existing.UpdatedAt = time.Now()
+		service.ID = existing.ID
+		service.CreatedAt = existing.CreatedAt
+		service.UpdatedAt = time.Now()
 		for i, s := range database.Local.Services {
 			if s.ID == existing.ID {
-				database.Local.Services[i] = existing
+				database.Local.Services[i] = service
 				break
 			}
 		}
-		newService = existing
+		newService = service
 	} else {
 		service.ID = utils.GenerateID(0)
 		service.UpdatedAt = time.Now()
