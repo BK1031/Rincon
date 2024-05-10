@@ -41,6 +41,10 @@ func VerifyConfig() {
 		config.StorageMode = "local"
 		SugarLogger.Infoln("STORAGE_MODE is not set, defaulting to local")
 	}
+	if config.OverwriteRoutes == "" {
+		config.OverwriteRoutes = "true"
+		SugarLogger.Debugln("OVERWRITE_ROUTES is not set, defaulting to true")
+	}
 }
 
 func verifySql() {

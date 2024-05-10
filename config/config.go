@@ -16,6 +16,7 @@ var ServiceIDLength = os.Getenv("SERVICE_ID_LENGTH")
 // StorageMode is the mode of storage to use.
 // It can be "local", "sql", "redis", 'redis+sql".
 var StorageMode = os.Getenv("STORAGE_MODE")
+var OverwriteRoutes = os.Getenv("OVERWRITE_ROUTES")
 
 // DatabaseDriver is the driver to use for the database.
 // It can be "mysql" or "postgres".
