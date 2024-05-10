@@ -30,7 +30,7 @@ func TestNormalizeName(t *testing.T) {
 	t.Run("Test Normalize Name", func(t *testing.T) {
 		name := "Service Name"
 		normalized := NormalizeName(name)
-		if normalized != "Service_Name" {
+		if normalized != "service_name" {
 			t.Errorf("Service Name is not service_name")
 		}
 	})
