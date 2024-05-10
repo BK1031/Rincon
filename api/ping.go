@@ -10,6 +10,6 @@ func Ping(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message":  "Rincon v" + config.Version + " is online!",
 		"services": service.GetNumUniqueServices(),
-		"routes":   service.GetNumUniqueServices(),
+		"routes":   service.GetNumRoutes(),
 	})
 }
