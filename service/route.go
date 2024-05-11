@@ -47,16 +47,18 @@ func CreateRoute(route model.Route) error {
 		return fmt.Errorf("route cannot be empty")
 	} else if route.ServiceName == "" {
 		return fmt.Errorf("service name cannot be empty")
+	} else if strings.HasSuffix(route.Route, "/") {
+		return fmt.Errorf("route cannot end with a slash")
 	}
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	route.CreatedAt = time.Now()
-	defer BuildRouteGraph()
 
 	if GetRouteByID(route.Route).Route != "" {
 		if route.ServiceName != GetRouteByID(route.Route).ServiceName {
 			if config.OverwriteRoutes == "true" {
 				DeleteRoute(route.Route)
 			} else {
+				utils.SugarLogger.Errorf("route with id %s already exists", route.Route)
 				return fmt.Errorf("route with id %s already exists", route.Route)
 			}
 		} else {
@@ -65,6 +67,7 @@ func CreateRoute(route model.Route) error {
 		}
 	}
 	database.Local.Routes = append(database.Local.Routes, route)
+	utils.SugarLogger.Infof("route with id %s registered for service %s", route.Route, route.ServiceName)
 	return nil
 }
 
@@ -75,12 +78,34 @@ func DeleteRoute(id string) {
 			break
 		}
 	}
-	BuildRouteGraph()
+	utils.SugarLogger.Infof("route with id %s deleted", id)
 }
 
-func BuildRouteGraph() {
+func MatchRoute(route string) model.Service {
+	var service model.Service
+	graph := GetRouteGraph()
+	slugs := strings.Split(route, "/")
+	path := ""
+	for i := 0; i < len(slugs); i++ {
+		if path == "" {
+			path = "/"
+		}
+		println("searching for", path, "in", graph)
+		children, exists := graph[path]
+
+		if path == "/" {
+			path += slugs[i]
+		} else {
+			path += "/" + slugs[i]
+		}
+	}
+	return service
+}
+
+func GetRouteGraph() map[string][]model.RouteNode {
 	children := make(map[string][]model.RouteNode)
-	for _, r := range database.Local.Routes {
+	routes := GetAllRoutes()
+	for _, r := range routes {
 		slugs := strings.Split(r.Route, "/")
 		parent := ""
 		for i := 0; i < len(slugs); i++ {
@@ -88,13 +113,9 @@ func BuildRouteGraph() {
 				if parent == "" {
 					parent = "/"
 				}
-				println("i: ", i)
-				println("len: ", len(slugs))
-				println("Parent: ", parent)
 				if _, exists := children[parent]; !exists {
 					children[parent] = make([]model.RouteNode, 0)
 				}
-				println("Slug: ", slugs[i])
 				// delete existing node
 				for j, n := range children[parent] {
 					if n.Path == slugs[i] {
@@ -120,13 +141,5 @@ func BuildRouteGraph() {
 			}
 		}
 	}
-	println("=====================================")
-	println("Route Graph")
-	println("Nodes:", len(children))
-	for parent, nodes := range children {
-		println(parent)
-		for _, n := range nodes {
-			println(" -> " + n.Path + " (" + n.ServiceName + ")")
-		}
-	}
+	return children
 }

@@ -12,4 +12,5 @@ func InitializeRoutes(router *gin.Engine) {
 	rincon.GET("/routes", GetAllRoutes)
 	rincon.GET("/routes/:id", GetRoute)
 	rincon.POST("/routes", CreateRoute)
+	rincon.GET("/match/:route", MatchRoute)
 }

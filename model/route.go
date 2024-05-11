@@ -22,12 +22,3 @@ type RouteNode struct {
 func (RouteNode) TableName() string {
 	return "route_node"
 }
-
-type RouteEdge struct {
-	ParentID string `json:"parent_id" gorm:"primaryKey"`
-	ChildID  string `json:"child_id" gorm:"primaryKey"`
-}
-
-func (RouteEdge) TableName() string {
-	return "route_edge"
-}

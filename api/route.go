@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"rincon/model"
 	"rincon/service"
+	"strings"
 )
 
 func GetAllRoutes(c *gin.Context) {
@@ -38,4 +39,16 @@ func CreateRoute(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, service.GetRouteByID(input.Route))
+}
+
+func MatchRoute(c *gin.Context) {
+	route := strings.ReplaceAll(c.Param("route"), "<->", "/")
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	result := service.MatchRoute(route)
+	if result.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No route /" + route + " found"})
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }

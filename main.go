@@ -6,6 +6,7 @@ import (
 	"rincon/api"
 	"rincon/config"
 	"rincon/database"
+	"rincon/service"
 	"rincon/utils"
 	"time"
 )
@@ -38,6 +39,7 @@ func main() {
 	utils.VerifyConfig()
 	database.InitializeLocal()
 	database.InitializeDB()
+	service.RegisterSelf()
 
 	router = setupRouter()
 	api.InitializeRoutes(router)
