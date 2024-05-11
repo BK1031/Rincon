@@ -87,10 +87,16 @@ func MatchRoute(route string) model.Service {
 	graph := GetRouteGraph()
 	slugs := strings.Split(route, "/")
 	path := []string{"/"}
+	println("MATCHING ROUTE FOR  /" + route)
 	for i := 0; i < len(slugs); i++ {
 		searchPath := strings.Join(path, "")
-		println("searching for", searchPath, "in graph")
-		c := CheckChildren(searchPath, graph[searchPath])
+		println("[MatchRoute-for] searching for", searchPath, "in graph")
+		if _, exists := graph[searchPath]; !exists {
+			println("no match found")
+			break
+		}
+		println("found ", searchPath, " in graph")
+		c := CheckChildren(slugs[i], graph[searchPath])
 		if c != "" {
 			println("selected", c)
 		} else {
