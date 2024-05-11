@@ -82,24 +82,53 @@ func DeleteRoute(id string) {
 }
 
 func MatchRoute(route string) model.Service {
+	PrintRouteGraph()
 	var service model.Service
 	graph := GetRouteGraph()
 	slugs := strings.Split(route, "/")
-	path := ""
+	path := []string{"/"}
 	for i := 0; i < len(slugs); i++ {
-		if path == "" {
-			path = "/"
-		}
-		println("searching for", path, "in", graph)
-		children, exists := graph[path]
-
-		if path == "/" {
-			path += slugs[i]
+		searchPath := strings.Join(path, "")
+		println("searching for", searchPath, "in graph")
+		c := CheckChildren(searchPath, graph[searchPath])
+		if c != "" {
+			println("selected", c)
 		} else {
-			path += "/" + slugs[i]
+			println("no match found")
 		}
+		if path[len(path)-1] == "/" {
+			path = append(path, slugs[i])
+		} else {
+			path = append(path, "/"+slugs[i])
+		}
+		println("path is now", strings.Join(path, ""))
 	}
 	return service
+}
+
+func CheckChildren(path string, children []model.RouteNode) string {
+	for _, c := range children {
+		println("checking", c.Path, "against", path)
+		if c.Path == path {
+			println("found match!")
+			return c.Path
+		}
+	}
+	for _, c := range children {
+		println("checking", c.Path, "against *")
+		if c.Path == "*" {
+			println("found wildcard!")
+			return c.Path
+		}
+	}
+	for _, c := range children {
+		println("checking", c.Path, "against **")
+		if c.Path == "**" {
+			println("found double wildcard!")
+			return c.Path
+		}
+	}
+	return ""
 }
 
 func GetRouteGraph() map[string][]model.RouteNode {
@@ -142,4 +171,16 @@ func GetRouteGraph() map[string][]model.RouteNode {
 		}
 	}
 	return children
+}
+
+func PrintRouteGraph() {
+	println("======= ROUTE GRAPH =======")
+	graph := GetRouteGraph()
+	for k, v := range graph {
+		println(k)
+		for _, n := range v {
+			println("   -> " + n.Path + " (" + n.ServiceName + ")")
+		}
+	}
+	println("===========================")
 }
