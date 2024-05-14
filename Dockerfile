@@ -1,5 +1,3 @@
-LABEL authors="bk1031"
-
 FROM golang:1.22-alpine3.19 as builder
 
 ENV GOOS=linux
