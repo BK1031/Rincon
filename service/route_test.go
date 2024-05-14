@@ -26,6 +26,16 @@ func TestCreateRouteLocal(t *testing.T) {
 			t.Errorf("No error when creating route: %v", err)
 		}
 	})
+	t.Run("Test Route Ends With Slash", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test/",
+			ServiceName: "Service 1",
+		}
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("No error when creating route: %v", err)
+		}
+	})
 	t.Run("Test Create Route", func(t *testing.T) {
 		route := model.Route{
 			Route:       "/test",
