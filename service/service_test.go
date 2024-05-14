@@ -148,3 +148,20 @@ func TestGetServicesLocal(t *testing.T) {
 		}
 	})
 }
+
+func TestRemoveServiceLocal(t *testing.T) {
+	t.Run("Test Remove Service", func(t *testing.T) {
+		s, _ := CreateService(model.Service{
+			Name:        "Service 1",
+			Version:     "1.0.0",
+			Endpoint:    "http://localhost:8080",
+			HealthCheck: "http://localhost:8080/health",
+		})
+		s, _ = CreateService(s)
+		RemoveService(s.ID)
+	})
+}
+
+func TestRegisterSelf(t *testing.T) {
+	RegisterSelf()
+}
