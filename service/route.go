@@ -85,68 +85,58 @@ func MatchRoute(route string) model.Service {
 	PrintRouteGraph()
 	var service model.Service
 	graph := GetRouteGraph()
-	slugs := strings.Split(route, "/")
-	println("MATCHING ROUTE FOR  /" + route)
-	println("slugs are", len(slugs))
+	utils.SugarLogger.Debugf("Matching route  /" + route)
+	//utils.SugarLogger.Debugf("input route has %d slugs", len(slugs))
 	matchedRoute := TraverseGraph("", route, graph)
-	if matchedRoute == "" {
-		println("no route found")
+	utils.SugarLogger.Debugf("Matched to " + matchedRoute)
+	for _, r := range GetAllRoutes() {
+		if r.Route == matchedRoute {
+			service.Name = r.ServiceName
+			break
+		}
 	}
-	println("matched route is", matchedRoute)
+	if service.Name == "" {
+		utils.SugarLogger.Debugf("No service found for route /" + route)
+	}
+	service = LoadBalance(service.Name, "random")
+	if service.ID == 0 {
+		utils.SugarLogger.Debugf("No eligible service instance found for" + service.Name)
+	} else {
+		utils.SugarLogger.Infof("Matched route /%s to %s for service %s (%d)", route, matchedRoute, service.Name, service.ID)
+	}
 	return service
 }
 
 func TraverseGraph(path string, route string, graph map[string][]model.RouteNode) string {
-	// assume path starts as "/"
-	// assume route looks like "/rincon/services/awesome/routes"
-	println(path, "path has ", strings.Count(path, "/"), "slugs")
-	println(route, "route has ", strings.Count("/"+route, "/"), "slugs")
-
-	currPathIndex := strings.Count(path, "/")
+	currPathCount := strings.Count(path, "/")
 	routeSlugCount := strings.Count("/"+route, "/")
+	lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
+	pathWithoutLastSlug := strings.TrimSuffix(path, "/"+lastSlug)
 
-	if currPathIndex == routeSlugCount {
-		return path
+	println("path: " + path)
+	println("route: /" + route)
+	println("currPathCount: " + fmt.Sprint(currPathCount))
+	println("routeSlugCount: " + fmt.Sprint(routeSlugCount))
+	println("lastSlug: " + lastSlug)
+	println("pathWithoutLastSlug: " + pathWithoutLastSlug)
+
+	if HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == "" {
+		return ""
 	}
 
+	if currPathCount == routeSlugCount {
+		return path
+	}
 	if path == "" {
 		path = "/"
 	}
-	// get current slug
-	slugs := strings.Split(route, "/")
-	currentSlug := slugs[currPathIndex]
-	println("current slug is", currentSlug)
 
-	if CheckChildren(currentSlug, graph[path]) != "" {
-		if path == "/" {
-			path += currentSlug
-		} else {
-			path += "/" + currentSlug
-		}
-		return TraverseGraph(path, route, graph)
-	} else if CheckChildren("*", graph[path]) != "" {
-		if path == "/" {
-			path += "*"
-		} else {
-			path += "/*"
-		}
-		return TraverseGraph(path, route, graph)
-	} else if CheckChildren("**", graph[path]) != "" {
-		if path == "/" {
-			path += "**"
-		} else {
-			path += "/**" + currentSlug
-		}
-		return path
-	}
 	return ""
 }
 
-func CheckChildren(path string, children []model.RouteNode) string {
+func HasChildPath(path string, children []model.RouteNode) string {
 	for _, c := range children {
-		println("checking", c.Path, "against", path)
 		if c.Path == path {
-			println("found match!")
 			return c.Path
 		}
 	}
