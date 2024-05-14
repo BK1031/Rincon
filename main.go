@@ -25,9 +25,7 @@ func setupRouter() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 		AllowCredentials: true,
 	}))
-	//r.Use(controller.RequestLogger())
-	//r.Use(controller.AuthChecker())
-	//r.Use(gr24controller.AuthMiddleware())
+	r.Use(api.AuthMiddleware())
 	return r
 }
 

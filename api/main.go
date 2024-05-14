@@ -1,6 +1,11 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"encoding/base64"
+	"github.com/gin-gonic/gin"
+	"rincon/config"
+	"strings"
+)
 
 func InitializeRoutes(router *gin.Engine) {
 	rincon := router.Group("/rincon", func(c *gin.Context) {})
@@ -14,4 +19,23 @@ func InitializeRoutes(router *gin.Engine) {
 	rincon.GET("/routes/:id", GetRoute)
 	rincon.POST("/routes", CreateRoute)
 	rincon.GET("/match/:route", MatchRoute)
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "DELETE" {
+			auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
+			if len(auth) != 2 || auth[0] != "Basic" {
+				c.AbortWithStatusJSON(401, gin.H{"message": "Request not authorized"})
+				return
+			}
+			payload, _ := base64.StdEncoding.DecodeString(auth[1])
+			pair := strings.SplitN(string(payload), ":", 2)
+			if len(pair) != 2 || pair[0] != config.AuthUser || pair[1] != config.AuthPassword {
+				c.AbortWithStatusJSON(401, gin.H{"message": "Request not authorized"})
+				return
+			}
+		}
+		c.Next()
+	}
 }
