@@ -57,21 +57,21 @@ func VerifyConfig() {
 
 func verifySql() {
 	if config.DatabaseDriver == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_DRIVER is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_DRIVER is not set")
 	}
 	if config.DatabaseHost == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_HOST is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_HOST is not set")
 	}
 	if config.DatabasePort == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_PORT is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_PORT is not set")
 	}
 	if config.DatabaseName == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_NAME is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_NAME is not set")
 	}
 	if config.DatabaseUser == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_USER is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_USER is not set")
 	}
 	if config.DatabasePassword == "" {
-		SugarLogger.Fatalln("STORAGE_MODE is set to " + config.StorageMode + " but DB_PASSWORD is not set")
+		SugarLogger.Errorln("STORAGE_MODE is set to " + config.StorageMode + " but DB_PASSWORD is not set")
 	}
 }
