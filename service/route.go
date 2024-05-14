@@ -82,12 +82,17 @@ func DeleteRoute(id string) {
 }
 
 func MatchRoute(route string) model.Service {
-	PrintRouteGraph()
+	if utils.SugarLogger.Level().String() == "debug" {
+		PrintRouteGraph()
+	}
 	var service model.Service
 	graph := GetRouteGraph()
 	utils.SugarLogger.Debugf("Matching route  /" + route)
-	//utils.SugarLogger.Debugf("input route has %d slugs", len(slugs))
 	matchedRoute := TraverseGraph("", route, graph)
+	if matchedRoute == "" {
+		utils.SugarLogger.Errorf("No route found for /%s", route)
+		return service
+	}
 	utils.SugarLogger.Debugf("Matched to " + matchedRoute)
 	for _, r := range GetAllRoutes() {
 		if r.Route == matchedRoute {
@@ -96,11 +101,13 @@ func MatchRoute(route string) model.Service {
 		}
 	}
 	if service.Name == "" {
-		utils.SugarLogger.Debugf("No service found for route /" + route)
+		utils.SugarLogger.Errorf("No service found for route /%s", route)
+		go DeleteRoute(matchedRoute)
+		return service
 	}
 	service = LoadBalance(service.Name, "random")
 	if service.ID == 0 {
-		utils.SugarLogger.Debugf("No eligible service instance found for" + service.Name)
+		utils.SugarLogger.Infoln("No eligible service instance found for" + service.Name)
 	} else {
 		utils.SugarLogger.Infof("Matched route /%s to %s for service %s (%d)", route, matchedRoute, service.Name, service.ID)
 	}
@@ -113,7 +120,7 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 	lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 	pathWithoutLastSlug := strings.TrimSuffix(path, "/"+lastSlug)
 
-	utils.SugarLogger.Debugf("Traversing graph with path %s and route /%s", path, route)
+	utils.SugarLogger.Debugf("Traversing graph\nwith path %s\nand route /%s", path, route)
 
 	if pathWithoutLastSlug == "" {
 		pathWithoutLastSlug = "/"
