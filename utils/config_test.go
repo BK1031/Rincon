@@ -70,6 +70,11 @@ func TestVerifySql(t *testing.T) {
 	t.Run("Test Blank Driver", func(t *testing.T) {
 		config.StorageMode = "sql"
 		config.DatabaseDriver = ""
+		config.DatabaseHost = ""
+		config.DatabasePort = ""
+		config.DatabaseName = ""
+		config.DatabaseUser = ""
+		config.DatabasePassword = ""
 		verifySql()
 	})
 }
