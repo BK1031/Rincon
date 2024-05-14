@@ -42,3 +42,12 @@ func CreateService(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, createdService)
 }
+
+func RemoveService(c *gin.Context) {
+	if id, err := strconv.Atoi(c.Param("name")); err == nil {
+		service.RemoveService(id)
+		c.JSON(http.StatusOK, gin.H{"message": "Service with id " + strconv.Itoa(id) + " removed"})
+		return
+	}
+	c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid service id"})
+}

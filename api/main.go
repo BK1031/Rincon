@@ -7,6 +7,7 @@ func InitializeRoutes(router *gin.Engine) {
 	rincon.GET("/ping", Ping)
 	rincon.GET("/services", GetAllServices)
 	rincon.GET("/services/:name", GetService)
+	rincon.DELETE("/services/:name", RemoveService)
 	rincon.GET("/services/:name/routes", GetRoutesForService)
 	rincon.POST("/services", CreateService)
 	rincon.GET("/routes", GetAllRoutes)
