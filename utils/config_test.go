@@ -70,5 +70,6 @@ func TestVerifySql(t *testing.T) {
 	t.Run("Test Blank Driver", func(t *testing.T) {
 		config.StorageMode = "sql"
 		config.DatabaseDriver = ""
+		verifySql()
 	})
 }
