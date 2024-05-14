@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/go-co-op/gocron/v2"
+	"github.com/go-resty/resty/v2"
 	"rincon/config"
 	"rincon/utils"
 	"strconv"
@@ -43,15 +44,28 @@ func InitializeHeartbeat() {
 }
 
 func ServerHeartbeat(interval int) {
-	utils.SugarLogger.Infoln("Running server heartbeats...")
+	client := resty.New()
+	for _, s := range GetAllServices() {
+		resp, err := client.R().Get(s.HealthCheck)
+		if err != nil {
+			utils.SugarLogger.Errorf("Error pinging %s (%d): %v", s.Name, s.ID, err)
+			go RemoveService(s.ID)
+		} else {
+			if resp.StatusCode() >= 200 && resp.StatusCode() < 300 {
+				utils.SugarLogger.Infof("Pinged %s (%d) in %dms", s.Name, s.ID, resp.Time().Milliseconds())
+			} else {
+				utils.SugarLogger.Errorf("Error pinging %s (%d): %v", s.Name, s.ID, resp)
+				go RemoveService(s.ID)
+			}
+		}
+	}
 }
 
 func ClientHeartbeat(interval int) {
-	utils.SugarLogger.Infoln("Checking client heartbeats...")
 	for _, s := range GetAllServices() {
 		delta := time.Now().Sub(s.UpdatedAt).Milliseconds()
-		utils.SugarLogger.Infof("Last %s (%d) ping was %d milliseconds ago", s.Name, s.ID, delta)
-		if delta > int64((interval+1)*1000) {
+		utils.SugarLogger.Infof("Last %s (%d) ping was %dms ago", s.Name, s.ID, delta)
+		if delta > int64((interval+1)*1000) && s.Name != "rincon" {
 			utils.SugarLogger.Errorf("Service %s (%d) registration expired!", s.Name, s.ID)
 			go RemoveService(s.ID)
 		}
