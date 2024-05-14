@@ -482,6 +482,15 @@
 				"operationId": "0b98260b-cc46-4916-aac3-ec317ef17346",
 				"parameters": [
 					{
+						"name": "Authorization",
+						"in": "header",
+						"schema": {
+							"type": "string",
+							"default": "Basic YWRtaW46YWRtaW4=",
+							"description": ""
+						}
+					},
+					{
 						"name": "Content-Type",
 						"in": "header",
 						"schema": {
