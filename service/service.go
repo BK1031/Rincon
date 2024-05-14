@@ -94,14 +94,23 @@ func CreateService(service model.Service) (model.Service, error) {
 	return newService, nil
 }
 
+func RemoveService(id int) {
+	for i, s := range database.Local.Services {
+		if s.ID == id {
+			database.Local.Services = append(database.Local.Services[:i], database.Local.Services[i+1:]...)
+			break
+		}
+	}
+}
+
 func RegisterSelf() {
 	service := model.Service{
 		Name:        "Rincon",
 		Version:     config.Version,
 		Endpoint:    "http://localhost:" + config.Port,
 		HealthCheck: "http://localhost:" + config.Port + "/rincon/ping",
-		UpdatedAt:   time.Time{},
-		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Now(),
+		CreatedAt:   time.Now(),
 	}
 	_, err := CreateService(service)
 	if err != nil {
@@ -111,7 +120,7 @@ func RegisterSelf() {
 		err := CreateRoute(model.Route{
 			Route:       route,
 			ServiceName: "Rincon",
-			CreatedAt:   time.Time{},
+			CreatedAt:   time.Now(),
 		})
 		if err != nil {
 			utils.SugarLogger.Errorf("Error when creating route: %v", err)

@@ -45,6 +45,14 @@ func VerifyConfig() {
 		config.OverwriteRoutes = "true"
 		SugarLogger.Debugln("OVERWRITE_ROUTES is not set, defaulting to true")
 	}
+	if config.HeartbeatType == "" {
+		config.HeartbeatType = "server"
+		SugarLogger.Debugln("HEARTBEAT_TYPE is not set, defaulting to server")
+	}
+	if config.HeartbeatInterval == "" {
+		config.HeartbeatInterval = "10"
+		SugarLogger.Debugln("HEARTBEAT_INTERVAL is not set, defaulting to 10")
+	}
 }
 
 func verifySql() {

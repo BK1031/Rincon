@@ -16,7 +16,20 @@ var ServiceIDLength = os.Getenv("SERVICE_ID_LENGTH")
 // StorageMode is the mode of storage to use.
 // It can be "local", "sql", "redis", 'redis+sql".
 var StorageMode = os.Getenv("STORAGE_MODE")
+
+// OverwriteRoutes is a flag to determine if routes should be overwritten.
 var OverwriteRoutes = os.Getenv("OVERWRITE_ROUTES")
+
+// HeartbeatType is the type of heartbeat to use.
+// It can be "server" or "client".
+// If "server", Rincon will send heartbeats to the client service
+// health check endpoint at the interval specified by HEARTBEAT_INTERVAL.
+// If "client", Rincon will expect heartbeats from the client service
+// at the interval specified by HEARTBEAT_INTERVAL.
+var HeartbeatType = os.Getenv("HEARTBEAT_TYPE")
+
+// HeartbeatInterval is the interval at which heartbeats should be sent.
+var HeartbeatInterval = os.Getenv("HEARTBEAT_INTERVAL")
 
 // DatabaseDriver is the driver to use for the database.
 // It can be "mysql" or "postgres".

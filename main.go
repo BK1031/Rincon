@@ -40,6 +40,7 @@ func main() {
 	database.InitializeLocal()
 	database.InitializeDB()
 	service.RegisterSelf()
+	service.InitializeHeartbeat()
 
 	router = setupRouter()
 	api.InitializeRoutes(router)
