@@ -107,7 +107,7 @@ func RegisterSelf() {
 	if err != nil {
 		utils.SugarLogger.Errorf("Error when creating service: %v", err)
 	}
-	for _, route := range []string{"/rincon/ping", "/rincon/services/*", "/rincon/services/**", "rincon/services/epic/test"} {
+	for _, route := range []string{"/rincon/ping", "/rincon/services/*", "/rincon/services/**", "/rincon/services/epic/test"} {
 		err := CreateRoute(model.Route{
 			Route:       route,
 			ServiceName: "Rincon",

@@ -113,22 +113,40 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 	lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 	pathWithoutLastSlug := strings.TrimSuffix(path, "/"+lastSlug)
 
-	println("path: " + path)
-	println("route: /" + route)
-	println("currPathCount: " + fmt.Sprint(currPathCount))
-	println("routeSlugCount: " + fmt.Sprint(routeSlugCount))
-	println("lastSlug: " + lastSlug)
-	println("pathWithoutLastSlug: " + pathWithoutLastSlug)
+	utils.SugarLogger.Debugf("Traversing graph with path %s and route /%s", path, route)
 
-	if HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == "" {
+	if pathWithoutLastSlug == "" {
+		pathWithoutLastSlug = "/"
+	}
+	if lastSlug != "" && HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == "" {
+		utils.SugarLogger.Debugf("Child path %s does not exist", lastSlug)
 		return ""
 	}
-
-	if currPathCount == routeSlugCount {
+	if lastSlug == "**" {
+		utils.SugarLogger.Debugf("Found all path wildcard (**)")
 		return path
 	}
-	if path == "" {
-		path = "/"
+	println("child path found for " + lastSlug)
+
+	if currPathCount == routeSlugCount {
+		println("path and route have same slug count")
+		return path
+	}
+
+	nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
+	println("nextSlug: " + nextSlug)
+
+	slugBranch := TraverseGraph(path+"/"+nextSlug, route, graph)
+	if slugBranch != "" {
+		return slugBranch
+	}
+	anyBranch := TraverseGraph(path+"/*", route, graph)
+	if anyBranch != "" {
+		return anyBranch
+	}
+	allBranch := TraverseGraph(path+"/**", route, graph)
+	if allBranch != "" {
+		return allBranch
 	}
 
 	return ""
