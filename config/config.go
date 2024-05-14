@@ -14,7 +14,7 @@ var AuthPassword = os.Getenv("AUTH_PASSWORD")
 var ServiceIDLength = os.Getenv("SERVICE_ID_LENGTH")
 
 // StorageMode is the mode of storage to use.
-// It can be "local", "sql", "redis", 'redis+sql".
+// It can be "local", "sql", "redis", "redis+sql".
 var StorageMode = os.Getenv("STORAGE_MODE")
 
 // OverwriteRoutes is a flag to determine if routes should be overwritten.
