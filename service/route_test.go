@@ -123,3 +123,64 @@ func TestGetRoutesLocal(t *testing.T) {
 		}
 	})
 }
+
+func TestMatchRoute(t *testing.T) {
+	CreateService(model.Service{
+		Name:        "Montecito",
+		Version:     "1.4.2",
+		Endpoint:    "http://localhost:10312",
+		HealthCheck: "http://localhost:10312/health",
+	})
+	CreateService(model.Service{
+		Name:        "Lacumbre",
+		Version:     "2.7.9",
+		Endpoint:    "http://localhost:10313",
+		HealthCheck: "http://localhost:10313/health",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/ping",
+		ServiceName: "Montecito",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/*/awesome",
+		ServiceName: "Montecito",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/**",
+		ServiceName: "Lacumbre",
+	})
+	CreateRoute(model.Route{
+		Route:       "/no/service",
+		ServiceName: "No Service",
+	})
+	t.Run("Test Match Route", func(t *testing.T) {
+		route := MatchRoute("service/ping")
+		if route.Name != "montecito" {
+			t.Errorf("MatchRoute returned wrong service")
+		}
+	})
+	t.Run("Test Match Route 2", func(t *testing.T) {
+		route := MatchRoute("service/1/awesome")
+		if route.Name != "montecito" {
+			t.Errorf("MatchRoute returned wrong service")
+		}
+	})
+	t.Run("Test Match Route 3", func(t *testing.T) {
+		route := MatchRoute("service/1/awesome/2")
+		if route.Name != "lacumbre" {
+			t.Errorf("MatchRoute returned wrong service")
+		}
+	})
+	t.Run("Test Match Route 4", func(t *testing.T) {
+		route := MatchRoute("epic/awesome")
+		if route.Name != "" {
+			t.Errorf("MatchRoute returned wrong service")
+		}
+	})
+	t.Run("Test Match Route 5", func(t *testing.T) {
+		route := MatchRoute("no/service")
+		if route.Name != "" {
+			t.Errorf("MatchRoute returned wrong service")
+		}
+	})
+}
