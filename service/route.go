@@ -86,30 +86,60 @@ func MatchRoute(route string) model.Service {
 	var service model.Service
 	graph := GetRouteGraph()
 	slugs := strings.Split(route, "/")
-	path := []string{"/"}
 	println("MATCHING ROUTE FOR  /" + route)
-	for i := 0; i < len(slugs); i++ {
-		searchPath := strings.Join(path, "")
-		println("[MatchRoute-for] searching for", searchPath, "in graph")
-		if _, exists := graph[searchPath]; !exists {
-			println("no match found")
-			break
-		}
-		println("found ", searchPath, " in graph")
-		c := CheckChildren(slugs[i], graph[searchPath])
-		if c != "" {
-			println("selected", c)
-		} else {
-			println("no match found")
-		}
-		if path[len(path)-1] == "/" {
-			path = append(path, slugs[i])
-		} else {
-			path = append(path, "/"+slugs[i])
-		}
-		println("path is now", strings.Join(path, ""))
+	println("slugs are", len(slugs))
+	matchedRoute := TraverseGraph("", route, graph)
+	if matchedRoute == "" {
+		println("no route found")
 	}
+	println("matched route is", matchedRoute)
 	return service
+}
+
+func TraverseGraph(path string, route string, graph map[string][]model.RouteNode) string {
+	// assume path starts as "/"
+	// assume route looks like "/rincon/services/awesome/routes"
+	println(path, "path has ", strings.Count(path, "/"), "slugs")
+	println(route, "route has ", strings.Count("/"+route, "/"), "slugs")
+
+	currPathIndex := strings.Count(path, "/")
+	routeSlugCount := strings.Count("/"+route, "/")
+
+	if currPathIndex == routeSlugCount {
+		return path
+	}
+
+	if path == "" {
+		path = "/"
+	}
+	// get current slug
+	slugs := strings.Split(route, "/")
+	currentSlug := slugs[currPathIndex]
+	println("current slug is", currentSlug)
+
+	if CheckChildren(currentSlug, graph[path]) != "" {
+		if path == "/" {
+			path += currentSlug
+		} else {
+			path += "/" + currentSlug
+		}
+		return TraverseGraph(path, route, graph)
+	} else if CheckChildren("*", graph[path]) != "" {
+		if path == "/" {
+			path += "*"
+		} else {
+			path += "/*"
+		}
+		return TraverseGraph(path, route, graph)
+	} else if CheckChildren("**", graph[path]) != "" {
+		if path == "/" {
+			path += "**"
+		} else {
+			path += "/**" + currentSlug
+		}
+		return path
+	}
+	return ""
 }
 
 func CheckChildren(path string, children []model.RouteNode) string {
@@ -117,20 +147,6 @@ func CheckChildren(path string, children []model.RouteNode) string {
 		println("checking", c.Path, "against", path)
 		if c.Path == path {
 			println("found match!")
-			return c.Path
-		}
-	}
-	for _, c := range children {
-		println("checking", c.Path, "against *")
-		if c.Path == "*" {
-			println("found wildcard!")
-			return c.Path
-		}
-	}
-	for _, c := range children {
-		println("checking", c.Path, "against **")
-		if c.Path == "**" {
-			println("found double wildcard!")
 			return c.Path
 		}
 	}
