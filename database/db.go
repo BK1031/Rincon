@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"rincon/config"
+	"rincon/model"
 	"rincon/utils"
 	"time"
 )
@@ -31,7 +32,7 @@ func InitializeDB() {
 		}
 	} else {
 		utils.SugarLogger.Infoln("Connected to database")
-		err := db.AutoMigrate()
+		err := db.AutoMigrate(&model.Service{}, &model.Route{})
 		if err != nil {
 			utils.SugarLogger.Fatalln("AutoMigration failed", err)
 		}
