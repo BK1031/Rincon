@@ -126,16 +126,14 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 		utils.SugarLogger.Debugf("Found all path wildcard (**)")
 		return path
 	}
-	println("child path found for " + lastSlug)
+	utils.SugarLogger.Debugf("Child path %s exists", lastSlug)
 
 	if currPathCount == routeSlugCount {
-		println("path and route have same slug count")
+		utils.SugarLogger.Debugf("Reached end of route")
 		return path
 	}
 
 	nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
-	println("nextSlug: " + nextSlug)
-
 	slugBranch := TraverseGraph(path+"/"+nextSlug, route, graph)
 	if slugBranch != "" {
 		return slugBranch
