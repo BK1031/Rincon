@@ -18,7 +18,7 @@ func TestInitializeHeartbeat(t *testing.T) {
 		Name:        "Lacumbre",
 		Version:     "2.7.9",
 		Endpoint:    "http://localhost:10313",
-		HealthCheck: "http://localhost:10313/health",
+		HealthCheck: "https://bk1031.dev",
 	})
 	t.Run("Test Invalid Heartbeat Interval", func(t *testing.T) {
 		config.HeartbeatInterval = "bruh"
@@ -32,13 +32,31 @@ func TestInitializeHeartbeat(t *testing.T) {
 			Name:        "Lacumbre",
 			Version:     "2.7.9",
 			Endpoint:    "http://localhost:10313",
-			HealthCheck: "http://localhost:10313/health",
+			HealthCheck: "https://bk1031.dev",
 		})
 		InitializeHeartbeat()
 		ClientHeartbeat(1)
 	})
 	t.Run("Test Server Heartbeat", func(t *testing.T) {
 		config.HeartbeatType = "server"
+		CreateService(model.Service{
+			Name:        "Lacumbre",
+			Version:     "2.7.9",
+			Endpoint:    "http://localhost:10313",
+			HealthCheck: "https://bk1031.dev",
+		})
+		CreateService(model.Service{
+			Name:        "Montecito",
+			Version:     "1.4.2",
+			Endpoint:    "http://localhost:10312",
+			HealthCheck: "http://localhost:10312/health",
+		})
+		CreateService(model.Service{
+			Name:        "Montecito",
+			Version:     "1.4.2",
+			Endpoint:    "http://localhost:10314",
+			HealthCheck: "https://bk1031.dev/health",
+		})
 		InitializeHeartbeat()
 		ServerHeartbeat(1)
 	})
