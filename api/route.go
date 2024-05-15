@@ -14,9 +14,12 @@ func GetAllRoutes(c *gin.Context) {
 }
 
 func GetRoute(c *gin.Context) {
-	result := service.GetRouteByID(c.Param("id"))
+	route := strings.ReplaceAll(c.Param("id"), "<->", "/")
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	result := service.GetRouteByID("/" + route)
 	if result.Route == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "No route " + c.Param("id") + " found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "No route /" + route + " found"})
 		return
 	}
 	c.JSON(http.StatusOK, result)
