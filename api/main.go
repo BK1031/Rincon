@@ -2,10 +2,28 @@ package api
 
 import (
 	"encoding/base64"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"rincon/config"
 	"strings"
+	"time"
 )
+
+func SetupRouter() *gin.Engine {
+	if config.Env == "PROD" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		MaxAge:           12 * time.Hour,
+		AllowCredentials: true,
+	}))
+	r.Use(AuthMiddleware())
+	return r
+}
 
 func InitializeRoutes(router *gin.Engine) {
 	rincon := router.Group("/rincon", func(c *gin.Context) {})
