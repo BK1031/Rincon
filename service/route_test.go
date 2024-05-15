@@ -184,3 +184,33 @@ func TestMatchRoute(t *testing.T) {
 		}
 	})
 }
+
+func TestPrintRouteGraph(t *testing.T) {
+	CreateService(model.Service{
+		Name:        "Montecito",
+		Version:     "1.4.2",
+		Endpoint:    "http://localhost:10312",
+		HealthCheck: "http://localhost:10312/health",
+	})
+	CreateService(model.Service{
+		Name:        "Lacumbre",
+		Version:     "2.7.9",
+		Endpoint:    "http://localhost:10313",
+		HealthCheck: "http://localhost:10313/health",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/ping",
+		ServiceName: "Montecito",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/*/awesome",
+		ServiceName: "Montecito",
+	})
+	CreateRoute(model.Route{
+		Route:       "/service/**",
+		ServiceName: "Lacumbre",
+	})
+	t.Run("Test Print Route Graph", func(t *testing.T) {
+		PrintRouteGraph()
+	})
+}
