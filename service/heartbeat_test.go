@@ -24,6 +24,14 @@ func TestInitializeHeartbeat(t *testing.T) {
 		config.HeartbeatInterval = "bruh"
 		InitializeHeartbeat()
 	})
+	t.Run("Test Initialize Server Heartbeat", func(t *testing.T) {
+		config.HeartbeatType = "server"
+		InitializeHeartbeat()
+	})
+	t.Run("Test Initialize Client Heartbeat", func(t *testing.T) {
+		config.HeartbeatType = "client"
+		InitializeHeartbeat()
+	})
 	t.Run("Test Client Heartbeat", func(t *testing.T) {
 		config.HeartbeatType = "client"
 		config.HeartbeatInterval = "1"
@@ -34,7 +42,6 @@ func TestInitializeHeartbeat(t *testing.T) {
 			Endpoint:    "http://localhost:10313",
 			HealthCheck: "https://bk1031.dev",
 		})
-		InitializeHeartbeat()
 		ClientHeartbeat(1)
 	})
 	t.Run("Test Server Heartbeat", func(t *testing.T) {
@@ -57,7 +64,6 @@ func TestInitializeHeartbeat(t *testing.T) {
 			Endpoint:    "http://localhost:10314",
 			HealthCheck: "https://bk1031.dev/health",
 		})
-		InitializeHeartbeat()
 		ServerHeartbeat(1)
 	})
 }

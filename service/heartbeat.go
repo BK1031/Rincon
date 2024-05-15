@@ -39,13 +39,13 @@ func ServerHeartbeat(interval int) {
 		resp, err := client.R().Get(s.HealthCheck)
 		if err != nil {
 			utils.SugarLogger.Errorf("Error pinging %s (%d): %v", s.Name, s.ID, err)
-			go RemoveService(s.ID)
+			RemoveService(s.ID)
 		} else {
 			if resp.StatusCode() >= 200 && resp.StatusCode() < 300 {
 				utils.SugarLogger.Infof("Pinged %s (%d) in %dms", s.Name, s.ID, resp.Time().Milliseconds())
 			} else {
 				utils.SugarLogger.Errorf("Error pinging %s (%d): %v", s.Name, s.ID, resp)
-				go RemoveService(s.ID)
+				RemoveService(s.ID)
 			}
 		}
 	}
@@ -57,7 +57,7 @@ func ClientHeartbeat(interval int) {
 		utils.SugarLogger.Infof("Last %s (%d) ping was %dms ago", s.Name, s.ID, delta)
 		if delta > int64((interval+1)*1000) && s.Name != "rincon" {
 			utils.SugarLogger.Errorf("Service %s (%d) registration expired!", s.Name, s.ID)
-			go RemoveService(s.ID)
+			RemoveService(s.ID)
 		}
 	}
 }
