@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine3.19 as builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine3.19 as builder
 
 ENV GOOS=linux
 
@@ -9,12 +9,12 @@ WORKDIR /app
 
 COPY go.mod ./
 COPY go.sum ./
-
 RUN go mod download
 
 COPY . ./
-
-RUN go build -o /rincon
+ARG TARGETOS
+ARG TARGETARCH
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /rincon
 
 ##
 ## Deploy
