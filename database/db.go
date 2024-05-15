@@ -32,7 +32,7 @@ func InitializeDB() {
 		}
 	} else {
 		utils.SugarLogger.Infoln("Connected to database")
-		err := db.AutoMigrate(&model.Service{}, &model.Route{})
+		err := db.AutoMigrate(&model.Service{}, &model.ServiceDependency{}, &model.Route{})
 		if err != nil {
 			utils.SugarLogger.Fatalln("AutoMigration failed", err)
 		}

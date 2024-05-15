@@ -18,7 +18,3 @@ type RouteNode struct {
 	ServiceName string    `json:"service_name"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 }
-
-func (RouteNode) TableName() string {
-	return "route_node"
-}
