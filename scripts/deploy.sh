@@ -15,4 +15,4 @@ fi
 
 echo "Building container for Rincon v$1"
 # Build the docker container
-docker build -t bk1031/rincon:"$1" -t bk1031/rincon:latest --platform linux/amd64,linux/arm64 --push --progress=plain .
+docker build -t bk1031/rincon:"$1" -t bk1031/rincon:latest --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v5,windows/amd64 --push --progress=plain .
