@@ -21,6 +21,10 @@ func TestMain(m *testing.M) {
 	utils.VerifyConfig()
 	database.InitializeLocal()
 
+	database.InitializeDB()
+	config.DatabaseDriver = "postgres"
+	database.InitializeDB()
+
 	ctx := context.Background()
 	ms := InitializeMysql(ctx)
 	pg := InitializePostgres(ctx)

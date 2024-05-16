@@ -22,7 +22,7 @@ func InitializeDB() {
 		return
 	}
 	if err != nil {
-		if dbRetries < 10 {
+		if dbRetries < 5 {
 			dbRetries++
 			utils.SugarLogger.Errorln("Failed to connect database, retrying in 5s... ")
 			time.Sleep(time.Second * 5)
