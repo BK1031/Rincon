@@ -10,6 +10,7 @@ import (
 	"os"
 	"rincon/config"
 	"rincon/database"
+	"rincon/model"
 	"rincon/utils"
 	"testing"
 	"time"
@@ -88,4 +89,16 @@ func InitializeMysql(ctx context.Context) *mysql.MySQLContainer {
 	config.DatabasePort = p.Port()
 	database.InitializeDB()
 	return mysqlContainer
+}
+
+func ResetLocalDB() {
+	config.StorageMode = "local"
+	database.Local.Services = make([]model.Service, 0)
+	database.Local.Routes = make([]model.Route, 0)
+}
+
+func ResetSQLDB() {
+	config.StorageMode = "sql"
+	database.DB.Where("1 = 1").Delete(&model.Service{})
+	database.DB.Where("1 = 1").Delete(&model.Route{})
 }

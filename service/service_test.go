@@ -1,7 +1,6 @@
 package service
 
 import (
-	"rincon/config"
 	"rincon/database"
 	"rincon/model"
 	"testing"
@@ -9,7 +8,7 @@ import (
 )
 
 func TestCreateServiceLocal(t *testing.T) {
-	config.StorageMode = "local"
+	ResetLocalDB()
 	t.Run("Test No Name", func(t *testing.T) {
 		service := model.Service{
 			Version:     "1.0.0",
@@ -102,9 +101,8 @@ func TestCreateServiceLocal(t *testing.T) {
 }
 
 func TestGetServicesLocal(t *testing.T) {
-	config.StorageMode = "local"
+	ResetLocalDB()
 	t.Run("Test Get All Services 1", func(t *testing.T) {
-		database.Local.Services = make([]model.Service, 0)
 		services := GetAllServices()
 		if len(services) != 0 {
 			t.Errorf("Services not empty")
@@ -153,7 +151,7 @@ func TestGetServicesLocal(t *testing.T) {
 }
 
 func TestRemoveServiceLocal(t *testing.T) {
-	config.StorageMode = "local"
+	ResetLocalDB()
 	t.Run("Test Remove Service", func(t *testing.T) {
 		s, _ := CreateService(model.Service{
 			Name:        "Service 1",
@@ -167,7 +165,7 @@ func TestRemoveServiceLocal(t *testing.T) {
 }
 
 func TestCreateServiceSQL(t *testing.T) {
-	config.StorageMode = "sql"
+	ResetSQLDB()
 	t.Run("Test Create Service", func(t *testing.T) {
 		service := model.Service{
 			Name:        "Service 1",
@@ -208,7 +206,7 @@ func TestCreateServiceSQL(t *testing.T) {
 }
 
 func TestGetServicesSQL(t *testing.T) {
-	config.StorageMode = "sql"
+	ResetSQLDB()
 	t.Run("Test Get All Services 1", func(t *testing.T) {
 		database.DB.Where("1 = 1").Delete(&model.Service{})
 		services := GetAllServices()
@@ -259,7 +257,7 @@ func TestGetServicesSQL(t *testing.T) {
 }
 
 func TestRemoveServiceSQL(t *testing.T) {
-	config.StorageMode = "sql"
+	ResetSQLDB()
 	t.Run("Test Remove Service", func(t *testing.T) {
 		s, _ := CreateService(model.Service{
 			Name:        "Service 1",
@@ -273,5 +271,6 @@ func TestRemoveServiceSQL(t *testing.T) {
 }
 
 func TestRegisterSelf(t *testing.T) {
+	ResetLocalDB()
 	RegisterSelf()
 }
