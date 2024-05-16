@@ -21,10 +21,12 @@ func TestMain(m *testing.M) {
 	utils.VerifyConfig()
 	database.InitializeLocal()
 
+	// Test SQL connection failure before spinning up testcontainers
 	database.InitializeDB()
 	config.DatabaseDriver = "postgres"
 	database.InitializeDB()
 
+	// testcontainers time
 	ctx := context.Background()
 	ms := InitializeMysql(ctx)
 	pg := InitializePostgres(ctx)
