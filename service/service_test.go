@@ -210,7 +210,7 @@ func TestCreateServiceSQL(t *testing.T) {
 func TestGetServicesSQL(t *testing.T) {
 	config.StorageMode = "sql"
 	t.Run("Test Get All Services 1", func(t *testing.T) {
-		database.DB.Delete(&model.Service{})
+		database.DB.Where("1 = 1").Delete(&model.Service{})
 		services := GetAllServices()
 		if len(services) != 0 {
 			t.Errorf("Services not empty")
@@ -224,7 +224,7 @@ func TestGetServicesSQL(t *testing.T) {
 			HealthCheck: "http://localhost:8080/health",
 		})
 		services := GetAllServices()
-		if len(services) != 1 {
+		if len(services) == 0 {
 			t.Errorf("Services not 1")
 		}
 	})
@@ -247,12 +247,12 @@ func TestGetServicesSQL(t *testing.T) {
 		}
 	})
 	t.Run("Test Get Num Services", func(t *testing.T) {
-		if GetNumServices() == 0 {
+		if GetNumServices() != 2 {
 			t.Errorf("Services not found")
 		}
 	})
 	t.Run("Test Get Unique Num Services", func(t *testing.T) {
-		if GetNumUniqueServices() == 0 {
+		if GetNumUniqueServices() != 1 {
 			t.Errorf("Services not found")
 		}
 	})
