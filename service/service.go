@@ -101,6 +101,7 @@ func CreateService(service model.Service) (model.Service, error) {
 	existing := GetServiceByEndpoint(service.Endpoint)
 	if config.StorageMode == "sql" {
 		if existing.Endpoint != "" {
+			service.ID = existing.ID
 			database.DB.Model(&service).Where("endpoint = ?", service.Endpoint).Updates(service)
 		} else {
 			service.ID = utils.GenerateID(0)
