@@ -28,13 +28,15 @@ func InitializeDB() {
 			time.Sleep(time.Second * 5)
 			InitializeDB()
 		} else {
-			utils.SugarLogger.Fatalln("Failed to connect database after 10 attempts, terminating program...")
+			utils.SugarLogger.Errorln("Failed to connect database after 5 attempts, defaulting to local storage")
+			config.StorageMode = "local"
+			return
 		}
 	} else {
 		utils.SugarLogger.Infoln("Connected to database")
-		err := db.AutoMigrate(&model.Service{}, &model.ServiceDependency{}, &model.Route{})
+		err = db.AutoMigrate(&model.Service{}, &model.ServiceDependency{}, &model.Route{})
 		if err != nil {
-			utils.SugarLogger.Fatalln("AutoMigration failed", err)
+			utils.SugarLogger.Errorln("AutoMigration failed", err)
 		}
 		utils.SugarLogger.Infoln("AutoMigration complete")
 		DB = db
