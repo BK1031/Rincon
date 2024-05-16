@@ -1,6 +1,6 @@
 # Rincon
 
-<img align="right" width="159px" src="">
+<img align="right" width="159px" src="https://github.com/BK1031/Rincon/blob/bk1031/readme/assets/rincon-circle.png?raw=true">
 
 [![Rincon Tests](https://github.com/BK1031/Rincon/actions/workflows/test.yml/badge.svg)](https://github.com/BK1031/Rincon/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/BK1031/Rincon/graph/badge.svg?token=R4NMABYGOZ)](https://codecov.io/gh/BK1031/Rincon)
