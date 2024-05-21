@@ -11,28 +11,48 @@ import (
 
 func GetAllServices() []model.Service {
 	services := make([]model.Service, 0)
-	services = database.Local.Services
+	if config.StorageMode == "sql" {
+		database.DB.Find(&services)
+	} else {
+		services = database.Local.Services
+	}
 	return services
 }
 
 func GetNumServices() int {
-	return len(database.Local.Services)
+	if config.StorageMode == "sql" {
+		var count int64
+		database.DB.Model(&model.Service{}).Count(&count)
+		return int(count)
+	} else {
+		return len(database.Local.Services)
+	}
 }
 
 func GetNumUniqueServices() int {
-	unique := make(map[string]bool)
-	for _, s := range database.Local.Services {
-		unique[s.Name] = true
+	if config.StorageMode == "sql" {
+		var services []model.Service
+		database.DB.Distinct("name").Find(&services)
+		return len(services)
+	} else {
+		unique := make(map[string]bool)
+		for _, s := range database.Local.Services {
+			unique[s.Name] = true
+		}
+		return len(unique)
 	}
-	return len(unique)
 }
 
 func GetServiceByID(id int) model.Service {
 	var service model.Service
-	for _, s := range database.Local.Services {
-		if s.ID == id {
-			service = s
-			break
+	if config.StorageMode == "sql" {
+		database.DB.First(&service, id)
+	} else {
+		for _, s := range database.Local.Services {
+			if s.ID == id {
+				service = s
+				break
+			}
 		}
 	}
 	return service
@@ -40,9 +60,13 @@ func GetServiceByID(id int) model.Service {
 
 func GetServicesByName(name string) []model.Service {
 	services := make([]model.Service, 0)
-	for _, s := range database.Local.Services {
-		if s.Name == name {
-			services = append(services, s)
+	if config.StorageMode == "sql" {
+		database.DB.Where("name = ?", name).Find(&services)
+	} else {
+		for _, s := range database.Local.Services {
+			if s.Name == name {
+				services = append(services, s)
+			}
 		}
 	}
 	return services
@@ -50,10 +74,14 @@ func GetServicesByName(name string) []model.Service {
 
 func GetServiceByEndpoint(endpoint string) model.Service {
 	var service model.Service
-	for _, s := range database.Local.Services {
-		if s.Endpoint == endpoint {
-			service = s
-			break
+	if config.StorageMode == "sql" {
+		database.DB.Where("endpoint = ?", endpoint).First(&service)
+	} else {
+		for _, s := range database.Local.Services {
+			if s.Endpoint == endpoint {
+				service = s
+				break
+			}
 		}
 	}
 	return service
@@ -70,35 +98,48 @@ func CreateService(service model.Service) (model.Service, error) {
 		return model.Service{}, fmt.Errorf("service health check cannot be empty")
 	}
 	service.Name = utils.NormalizeName(service.Name)
-	var newService model.Service
 	existing := GetServiceByEndpoint(service.Endpoint)
-	if existing.Endpoint != "" {
-		service.ID = existing.ID
-		service.CreatedAt = existing.CreatedAt
-		service.UpdatedAt = time.Now()
-		for i, s := range database.Local.Services {
-			if s.ID == existing.ID {
-				database.Local.Services[i] = service
-				break
-			}
+	if config.StorageMode == "sql" {
+		if existing.Endpoint != "" {
+			service.ID = existing.ID
+			database.DB.Model(&service).Where("endpoint = ?", service.Endpoint).Updates(service)
+		} else {
+			service.ID = utils.GenerateID(0)
+			database.DB.Create(&service)
 		}
-		newService = service
 	} else {
-		service.ID = utils.GenerateID(0)
-		service.UpdatedAt = time.Now()
-		service.CreatedAt = time.Now()
-		database.Local.Services = append(database.Local.Services, service)
-		newService = service
+		if existing.Endpoint != "" {
+			service.ID = existing.ID
+			service.CreatedAt = existing.CreatedAt
+			service.UpdatedAt = time.Now()
+			for i, s := range database.Local.Services {
+				if s.ID == existing.ID {
+					database.Local.Services[i] = service
+					break
+				}
+			}
+		} else {
+			service.ID = utils.GenerateID(0)
+			service.UpdatedAt = time.Now()
+			service.CreatedAt = time.Now()
+			database.Local.Services = append(database.Local.Services, service)
+		}
 	}
+	newService := GetServiceByEndpoint(service.Endpoint)
 	utils.SugarLogger.Infof("registered service (%d) %s at %s", newService.ID, newService.Name, newService.Endpoint)
 	return newService, nil
 }
 
 func RemoveService(id int) {
-	for i, s := range database.Local.Services {
-		if s.ID == id {
-			database.Local.Services = append(database.Local.Services[:i], database.Local.Services[i+1:]...)
-			break
+	if config.StorageMode == "sql" {
+		database.DB.Delete(&model.Service{}, id)
+		return
+	} else {
+		for i, s := range database.Local.Services {
+			if s.ID == id {
+				database.Local.Services = append(database.Local.Services[:i], database.Local.Services[i+1:]...)
+				break
+			}
 		}
 	}
 }

@@ -12,20 +12,35 @@ import (
 
 func GetAllRoutes() []model.Route {
 	routes := make([]model.Route, 0)
-	routes = database.Local.Routes
+	if config.StorageMode == "sql" {
+		database.DB.Find(&routes)
+	} else {
+		routes = database.Local.Routes
+	}
 	return routes
 }
 
 func GetNumRoutes() int {
-	return len(database.Local.Routes)
+	if config.StorageMode == "sql" {
+		var count int64
+		database.DB.Model(&model.Route{}).Count(&count)
+		return int(count)
+
+	} else {
+		return len(database.Local.Routes)
+	}
 }
 
 func GetRouteByID(id string) model.Route {
 	var route model.Route
-	for _, r := range database.Local.Routes {
-		if r.Route == id {
-			route = r
-			break
+	if config.StorageMode == "sql" {
+		database.DB.Where("route = ?", id).First(&route)
+	} else {
+		for _, r := range database.Local.Routes {
+			if r.Route == id {
+				route = r
+				break
+			}
 		}
 	}
 	return route
@@ -34,9 +49,13 @@ func GetRouteByID(id string) model.Route {
 func GetRoutesByServiceName(name string) []model.Route {
 	name = utils.NormalizeName(name)
 	routes := make([]model.Route, 0)
-	for _, r := range database.Local.Routes {
-		if r.ServiceName == name {
-			routes = append(routes, r)
+	if config.StorageMode == "sql" {
+		database.DB.Where("service_name = ?", name).Find(&routes)
+	} else {
+		for _, r := range database.Local.Routes {
+			if r.ServiceName == name {
+				routes = append(routes, r)
+			}
 		}
 	}
 	return routes
@@ -66,16 +85,24 @@ func CreateRoute(route model.Route) error {
 			return nil
 		}
 	}
-	database.Local.Routes = append(database.Local.Routes, route)
+	if config.StorageMode == "sql" {
+		database.DB.Create(&route)
+	} else {
+		database.Local.Routes = append(database.Local.Routes, route)
+	}
 	utils.SugarLogger.Infof("route with id %s registered for service %s", route.Route, route.ServiceName)
 	return nil
 }
 
 func DeleteRoute(id string) {
-	for i, r := range database.Local.Routes {
-		if r.Route == id {
-			database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
-			break
+	if config.StorageMode == "sql" {
+		database.DB.Where("route = ?", id).Delete(&model.Route{})
+	} else {
+		for i, r := range database.Local.Routes {
+			if r.Route == id {
+				database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
+				break
+			}
 		}
 	}
 	utils.SugarLogger.Infof("route with id %s deleted", id)
