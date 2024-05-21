@@ -38,3 +38,7 @@ This way you can also connect Rincon to your existing database.
 ## Configuration
 
 ## API Endpoints
+
+
+
+## Roadmap
