@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"rincon/config"
+	"time"
+)
 
 type Route struct {
 	Route       string    `json:"route" gorm:"primaryKey"`
@@ -9,7 +12,7 @@ type Route struct {
 }
 
 func (Route) TableName() string {
-	return "route"
+	return config.DatabaseTablePrefix + "route"
 }
 
 type RouteNode struct {

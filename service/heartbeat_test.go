@@ -15,7 +15,7 @@ func TestInitializeHeartbeat(t *testing.T) {
 		HealthCheck: "http://localhost:10312/health",
 	})
 	CreateService(model.Service{
-		Name:        "Lacumbre",
+		Name:        "Montecito",
 		Version:     "2.7.9",
 		Endpoint:    "http://localhost:10313",
 		HealthCheck: "https://bk1031.dev",

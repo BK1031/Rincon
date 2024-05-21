@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-var Version = "1.0.3"
+var Version = "1.1.0"
 var Env = os.Getenv("ENV")
 var Port = os.Getenv("PORT")
 
@@ -39,3 +39,4 @@ var DatabasePort = os.Getenv("DB_PORT")
 var DatabaseName = os.Getenv("DB_NAME")
 var DatabaseUser = os.Getenv("DB_USER")
 var DatabasePassword = os.Getenv("DB_PASSWORD")
+var DatabaseTablePrefix = os.Getenv("DB_TABLE_PREFIX")

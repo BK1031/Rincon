@@ -53,6 +53,10 @@ func VerifyConfig() {
 		config.HeartbeatInterval = "10"
 		SugarLogger.Debugln("HEARTBEAT_INTERVAL is not set, defaulting to 10")
 	}
+	if config.DatabaseTablePrefix == "" {
+		config.DatabaseTablePrefix = "rin_"
+		SugarLogger.Debugln("DB_TABLE_PREFIX is not set, defaulting to rin_")
+	}
 }
 
 func verifySql() {
