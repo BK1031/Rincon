@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"rincon/config"
+	"time"
+)
 
 type Service struct {
 	ID          int       `json:"id" gorm:"primaryKey"`
@@ -13,7 +16,7 @@ type Service struct {
 }
 
 func (Service) TableName() string {
-	return "service"
+	return config.DatabaseTablePrefix + "service"
 }
 
 type ServiceDependency struct {
@@ -25,5 +28,5 @@ type ServiceDependency struct {
 }
 
 func (ServiceDependency) TableName() string {
-	return "service_dependency"
+	return config.DatabaseTablePrefix + "service_dependency"
 }
