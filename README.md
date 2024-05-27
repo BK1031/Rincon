@@ -6,8 +6,8 @@
 [![codecov](https://codecov.io/gh/BK1031/Rincon/graph/badge.svg?token=R4NMABYGOZ)](https://codecov.io/gh/BK1031/Rincon)
 [![GoDoc](https://pkg.go.dev/badge/github.com/bk1031/rincon?status.svg)](https://pkg.go.dev/github.com/bk1031/rincon?tab=doc)
 [![Docker Pulls](https://img.shields.io/docker/pulls/bk1031/rincon?style=flat-square)](https://hub.docker.com/repository/docker/bk1031/rincon)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/github/release/bk1031/rincon.svg?style=flat-square)](https://github.com/bk1031/rincon/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 Rincon is a cloud-native service registry written in [Go](https://go.dev/). 
