@@ -7,6 +7,7 @@ import (
 
 type Route struct {
 	Route       string    `json:"route" gorm:"primaryKey"`
+	Method      string    `json:"method" gorm:"primaryKey"`
 	ServiceName string    `json:"service_name"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
