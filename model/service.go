@@ -20,9 +20,8 @@ func (Service) TableName() string {
 }
 
 type ServiceDependency struct {
-	ID        string    `json:"id" gorm:"primaryKey"`
-	ParentID  string    `json:"parent_id"`
-	ChildID   string    `json:"child_id"`
+	ParentID  string    `json:"parent_id" gorm:"primaryKey"`
+	ChildID   string    `json:"child_id" gorm:"primaryKey"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime;precision:6"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
