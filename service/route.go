@@ -154,7 +154,7 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 	if pathWithoutLastSlug == "" {
 		pathWithoutLastSlug = "/"
 	}
-	if lastSlug != "" && HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == "" {
+	if lastSlug != "" && HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == -1 {
 		utils.SugarLogger.Debugf("Child path %s does not exist", lastSlug)
 		return ""
 	}
@@ -186,13 +186,13 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 	return ""
 }
 
-func HasChildPath(path string, children []model.RouteNode) string {
-	for _, c := range children {
+func HasChildPath(path string, children []model.RouteNode) int {
+	for i, c := range children {
 		if c.Path == path {
-			return c.Path
+			return i
 		}
 	}
-	return ""
+	return -1
 }
 
 func GetRouteGraph() map[string][]model.RouteNode {
@@ -209,23 +209,34 @@ func GetRouteGraph() map[string][]model.RouteNode {
 				if _, exists := children[parent]; !exists {
 					children[parent] = make([]model.RouteNode, 0)
 				}
-				// delete existing node
-				for j, n := range children[parent] {
-					if n.Path == slugs[i] {
-						children[parent] = append(children[parent][:j], children[parent][j+1:]...)
-						break
+				endpoint := false
+				if i == len(slugs)-1 {
+					endpoint = true
+				}
+				if index := HasChildPath(slugs[i], children[parent]); index != -1 {
+					if endpoint {
+						children[parent][index].Services = append(children[parent][index].Services, model.RouteService{
+							ServiceName: r.ServiceName,
+							Method:      r.Method,
+						})
+					}
+				} else {
+					if endpoint {
+						children[parent] = append(children[parent], model.RouteNode{
+							ID:        parent + "/" + slugs[i],
+							Path:      slugs[i],
+							Services:  []model.RouteService{{ServiceName: r.ServiceName, Method: r.Method}},
+							CreatedAt: time.Now(),
+						})
+					} else {
+						children[parent] = append(children[parent], model.RouteNode{
+							ID:        parent + "/" + slugs[i],
+							Path:      slugs[i],
+							Services:  []model.RouteService{},
+							CreatedAt: time.Now(),
+						})
 					}
 				}
-				name := ""
-				if i == len(slugs)-1 {
-					name = r.ServiceName
-				}
-				children[parent] = append(children[parent], model.RouteNode{
-					ID:          parent + "/" + slugs[i],
-					Path:        slugs[i],
-					ServiceName: name,
-					CreatedAt:   time.Now(),
-				})
 				if parent == "/" {
 					parent += slugs[i]
 				} else {
@@ -243,8 +254,19 @@ func PrintRouteGraph() {
 	for k, v := range graph {
 		println(k)
 		for _, n := range v {
-			println("   -> " + n.Path + " (" + n.ServiceName + ")")
+			println("   -> " + n.Path + " (" + PrintRouteServices(n.Services) + ")")
 		}
 	}
 	println("===========================")
+}
+
+func PrintRouteServices(rs []model.RouteService) string {
+	s := ""
+	for i, r := range rs {
+		s += fmt.Sprintf("[%s] %s", r.Method, r.ServiceName)
+		if i != len(rs)-1 {
+			s += ", "
+		}
+	}
+	return s
 }

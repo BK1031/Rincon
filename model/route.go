@@ -31,9 +31,13 @@ func (r *Route) IsMethodValid() bool {
 }
 
 type RouteNode struct {
-	ID          string    `json:"id" gorm:"primaryKey"`
-	Path        string    `json:"path"`
-	ServiceName string    `json:"service_name"`
-	Method      string    `json:"method"`
-	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
+	ID        string         `json:"id" gorm:"primaryKey"`
+	Path      string         `json:"path"`
+	Services  []RouteService `json:"services"`
+	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime;precision:6"`
+}
+
+type RouteService struct {
+	ServiceName string `json:"service_name"`
+	Method      string `json:"method"`
 }
