@@ -68,6 +68,8 @@ func CreateRoute(route model.Route) error {
 		return fmt.Errorf("service name cannot be empty")
 	} else if strings.HasSuffix(route.Route, "/") {
 		return fmt.Errorf("route cannot end with a slash")
+	} else if !route.IsMethodValid() {
+		return fmt.Errorf("invalid method %s", route.Method)
 	}
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	route.CreatedAt = time.Now()

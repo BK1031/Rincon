@@ -161,6 +161,7 @@ func RegisterSelf() {
 		err := CreateRoute(model.Route{
 			Route:       route,
 			ServiceName: "Rincon",
+			Method:      "*",
 			CreatedAt:   time.Now(),
 		})
 		if err != nil {
