@@ -2,11 +2,12 @@ package api
 
 import (
 	"encoding/base64"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"rincon/config"
 	"strings"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
@@ -36,7 +37,7 @@ func InitializeRoutes(router *gin.Engine) {
 	rincon.GET("/routes", GetAllRoutes)
 	rincon.GET("/routes/:id", GetRoute)
 	rincon.POST("/routes", CreateRoute)
-	rincon.GET("/match/:route", MatchRoute)
+	rincon.GET("/match", MatchRoute)
 }
 
 func AuthMiddleware() gin.HandlerFunc {

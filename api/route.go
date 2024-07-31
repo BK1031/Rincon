@@ -1,11 +1,13 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
 	"rincon/model"
 	"rincon/service"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetAllRoutes(c *gin.Context) {
@@ -45,12 +47,24 @@ func CreateRoute(c *gin.Context) {
 }
 
 func MatchRoute(c *gin.Context) {
-	route := strings.ReplaceAll(c.Param("route"), "<->", "/")
+	route := c.Query("route")
 	route = strings.TrimPrefix(route, "/")
 	route = strings.TrimSuffix(route, "/")
+	method := c.Query("method")
+	method = strings.ToUpper(method)
+
+	if route == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Route query is required"})
+		return
+	}
+	if method == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Method query is required"})
+		return
+	}
+
 	result := service.MatchRoute(route)
 	if result.ID == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": "No route /" + route + " found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("No route [%s] /%s found", method, route)})
 		return
 	}
 	c.JSON(http.StatusOK, result)
