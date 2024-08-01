@@ -13,4 +13,4 @@ if [ ! -f scripts/test-env.sh ]; then
 fi
 
 source scripts/test-env.sh
-go test ./... -race -covermode=atomic -coverprofile=coverage.out -v
+go test ./... -race -covermode=atomic -coverprofile=coverage.out

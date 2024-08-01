@@ -2,10 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/mysql"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"log"
 	"os"
 	"rincon/config"
@@ -14,14 +10,20 @@ import (
 	"rincon/utils"
 	"testing"
 	"time"
+
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mysql"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func TestMain(m *testing.M) {
 	utils.InitializeLogger()
 	utils.VerifyConfig()
-	database.InitializeLocal()
+	database.InitializeDB()
 
 	// Test SQL connection failure before spinning up testcontainers
+	config.StorageMode = "sql"
 	database.InitializeDB()
 	config.DatabaseDriver = "postgres"
 	database.InitializeDB()
