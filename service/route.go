@@ -31,21 +31,6 @@ func GetNumRoutes() int {
 	}
 }
 
-func GetRouteByID(id string) model.Route {
-	var route model.Route
-	if config.StorageMode == "sql" {
-		database.DB.Where("id = ?", id).First(&route)
-	} else {
-		for _, r := range database.Local.Routes {
-			if r.ID == id {
-				route = r
-				break
-			}
-		}
-	}
-	return route
-}
-
 func GetRoutesByRoute(route string) []model.Route {
 	routes := make([]model.Route, 0)
 	if config.StorageMode == "sql" {
