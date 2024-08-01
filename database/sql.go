@@ -14,12 +14,6 @@ import (
 
 func InitializeSQL() {
 	db, err := SelectDB()
-	if db == nil {
-		utils.SugarLogger.Debugln("No valid database config, defaulting to local storage")
-		config.StorageMode = "local"
-		InitializeLocal()
-		return
-	}
 	if err != nil {
 		if dbRetries < 5 {
 			dbRetries++
@@ -28,6 +22,7 @@ func InitializeSQL() {
 			InitializeSQL()
 		} else {
 			utils.SugarLogger.Errorln("Failed to connect database after 5 attempts, defaulting to local storage")
+			config.StorageMode = "local"
 			InitializeLocal()
 			return
 		}

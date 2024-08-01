@@ -69,7 +69,7 @@
 				
 				<option value="file6">rincon/database/local.go (100.0%)</option>
 				
-				<option value="file7">rincon/database/sql.go (86.7%)</option>
+				<option value="file7">rincon/database/sql.go (96.0%)</option>
 				
 				<option value="file8">rincon/main.go (0.0%)</option>
 				
@@ -376,9 +376,9 @@ var DB *gorm.DB
 var dbRetries = 0
 
 func InitializeDB() <span class="cov10" title="7">{
-        if config.StorageMode == "sql" </span><span class="cov6" title="3">{
+        if config.StorageMode == "sql" </span><span class="cov8" title="5">{
                 InitializeSQL()
-        }</span> else<span class="cov7" title="4"> {
+        }</span> else<span class="cov4" title="2"> {
                 InitializeLocal()
         }</span>
 }
@@ -396,7 +396,7 @@ type LocalStore struct {
         Routes              []model.Route
 }
 
-func InitializeLocal() <span class="cov10" title="5">{
+func InitializeLocal() <span class="cov10" title="6">{
         Local = &amp;LocalStore{
                 Services:            make([]model.Service, 0),
                 ServiceDependencies: make([]model.ServiceDependency, 0),
@@ -419,54 +419,55 @@ import (
         "gorm.io/gorm"
 )
 
-func InitializeSQL() <span class="cov10" title="4">{
+func InitializeSQL() <span class="cov10" title="10">{
         db, err := SelectDB()
-        if db == nil </span><span class="cov1" title="1">{
-                utils.SugarLogger.Debugln("No valid database config, defaulting to local storage")
-                config.StorageMode = "local"
-                InitializeLocal()
-                return
-        }</span>
-        <span class="cov8" title="3">if err != nil </span><span class="cov1" title="1">{
-                if dbRetries &lt; 5 </span><span class="cov1" title="1">{
+        // if db == nil {
+        //         utils.SugarLogger.Debugln("No valid database config, defaulting to local storage")
+        //         config.StorageMode = "local"
+        //         InitializeLocal()
+        //         return
+        // }
+        if err != nil </span><span class="cov9" title="9">{
+                if dbRetries &lt; 5 </span><span class="cov7" title="5">{
                         dbRetries++
                         utils.SugarLogger.Errorln("Failed to connect database, retrying in 5s... ")
                         time.Sleep(time.Second * 5)
                         InitializeSQL()
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov6" title="4"> {
                         utils.SugarLogger.Errorln("Failed to connect database after 5 attempts, defaulting to local storage")
+                        config.StorageMode = "local"
                         InitializeLocal()
-                        return
-                }</span>
-        } else<span class="cov5" title="2"> {
+                        </span>return
+                }
+        } else {
                 utils.SugarLogger.Infoln("Connected to database")
-                err = db.AutoMigrate(&amp;model.Service{}, &amp;model.ServiceDependency{}, &amp;model.Route{})
-                if err != nil </span><span class="cov0" title="0">{
-                        utils.SugarLogger.Errorln("AutoMigration failed", err)
-                }</span>
-                <span class="cov5" title="2">utils.SugarLogger.Infoln("AutoMigration complete")
-                DB = db</span>
+                err = db.AutoM</span><span class="cov0" title="0">igrate(&amp;model.Service{}, &amp;model.ServiceDependency{}, &amp;model.Route{})
+                if err != nil {
+                        </span>utils.SugarLogger.Errorln("AutoMigration failed", err)
+                <span class="cov1" title="1">}
+                utils.S</span>ugarLogger.Infoln("AutoMigration complete")
+                DB = db
         }
 }
 
-func SelectDB() (*gorm.DB, error) <span class="cov10" title="4">{
-        if config.DatabaseDriver == "mysql" </span><span class="cov1" title="1">{
-                return ConnectMysql()
-        }</span> else<span class="cov8" title="3"> if config.DatabaseDriver == "postgres" </span><span class="cov5" title="2">{
-                return ConnectPostgres()
-        }</span>
-        <span class="cov1" title="1">return nil, fmt.Errorf("invalid database driver")</span>
+func SelectDB() (*gorm.DB, error) {
+</span>        if config.DatabaseDriver == "mysql" {
+                </span>retur<span class="cov9" title="8">n ConnectMysql()
+</span>        } else if config.DatabaseDriver == "postgres" {
+                </span>return ConnectPostgres()
+        <span class="cov8" title="6">}
+</span>        return nil, fmt.Errorf("invalid database driver")
 }
 
-func ConnectPostgres() (*gorm.DB, error) <span class="cov5" title="2">{
+func ConnectPostgres() (*gorm.DB, error) {
         dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC", config.DatabaseHost, config.DatabaseUser, config.DatabasePassword, config.DatabaseName, config.DatabasePort)
-        return gorm.Open(postgres.Open(dsn), &amp;gorm.Config{})
-}</span>
+        </span>return gorm.Open(postgres.Open(dsn), &amp;gorm.Config{})
+}
 
-func ConnectMysql() (*gorm.DB, error) <span class="cov1" title="1">{
+func ConnectMysql() (*gorm.DB, error) {
         dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&amp;parseTime=True&amp;loc=UTC", config.DatabaseUser, config.DatabasePassword, config.DatabaseHost, config.DatabasePort, config.DatabaseName)
-        return gorm.Open(mysql.Open(dsn), &amp;gorm.Config{})
-}</span>
+        </span>return gorm.Open(mysql.Open(dsn), &amp;gorm.Config{})
+}
 </pre>
 		
 		<pre class="file" id="file8" style="display: none">package main
@@ -517,7 +518,7 @@ type Route struct {
         CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (Route) TableName() string <span class="cov3" title="2">{
+func (Route) TableName() string <span class="cov1" title="1">{
         return config.DatabaseTablePrefix + "route"
 }</span>
 
@@ -561,7 +562,7 @@ type Service struct {
         CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (Service) TableName() string <span class="cov10" title="2">{
+func (Service) TableName() string <span class="cov8" title="1">{
         return config.DatabaseTablePrefix + "service"
 }</span>
 
@@ -572,7 +573,7 @@ type ServiceDependency struct {
         CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (ServiceDependency) TableName() string <span class="cov10" title="2">{
+func (ServiceDependency) TableName() string <span class="cov8" title="1">{
         return config.DatabaseTablePrefix + "service_dependency"
 }</span>
 </pre>
