@@ -71,6 +71,7 @@ func GetRouteByRouteAndMethod(route string, method string) model.Route {
 }
 
 func GetRouteByRouteAndService(route string, service string) model.Route {
+	service = utils.NormalizeName(service)
 	routes := GetRoutesByRoute(route)
 	for _, r := range routes {
 		if r.ServiceName == service {
@@ -90,21 +91,22 @@ func CreateRoute(route model.Route) error {
 	} else if !route.IsMethodValid() {
 		return fmt.Errorf("invalid method %s", route.Method)
 	}
-	route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
+	route.Method = strings.ToUpper(route.Method)
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
+	route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
 	route.CreatedAt = time.Now()
 
-	if IsRouteMethodOverlap(route) {
+	overlapRoutes := GetOverlappingRoutes(route)
+	if len(overlapRoutes) == 1 && overlapRoutes[0].ServiceName == route.ServiceName {
+		utils.SugarLogger.Debugf("replacing existing route %s for service %s", route.Route, route.ServiceName)
+		DeleteRoute(overlapRoutes[0].ID)
+	} else if len(overlapRoutes) > 0 {
 		if config.OverwriteRoutes == "true" {
-			DeleteRoute(route.ID)
+			for _, r := range overlapRoutes {
+				DeleteRoute(r.ID)
+			}
 		} else {
-			return fmt.Errorf("route with id %s overlaps with an existing route", route.ID)
-		}
-	} else if existingRoute := GetRouteByRouteAndService(route.Route, route.ServiceName); existingRoute.ID != "" {
-		utils.SugarLogger.Debugf("route with route %s for service %s already exists", route.Route, route.ServiceName)
-		if existingRoute.Method != route.Method {
-			utils.SugarLogger.Debugf("route has different method, replacing existing route")
-			DeleteRoute(existingRoute.ID)
+			return fmt.Errorf("route with id %s overlaps with existing routes [%s]", route.ID, PrintRouteArray(overlapRoutes))
 		}
 	}
 
@@ -117,31 +119,48 @@ func CreateRoute(route model.Route) error {
 	return nil
 }
 
-func IsRouteMethodOverlap(route model.Route) bool {
-	routes := GetRoutesByRoute(route.Route)
+func PrintRouteArray(routes []model.Route) string {
+	s := ""
+	for i, r := range routes {
+		s += fmt.Sprintf("[%s] %s (%s)", r.Method, r.Route, r.ServiceName)
+		if i != len(routes)-1 {
+			s += ", "
+		}
+	}
+	return s
+}
+
+func GetOverlappingRoutes(route model.Route) []model.Route {
+	route.Method = strings.ToUpper(route.Method)
+	route.ServiceName = utils.NormalizeName(route.ServiceName)
+	overlapRoutes := make([]model.Route, 0)
+	existingRoutes := GetRoutesByRoute(route.Route)
 	takenMethods := make(map[string]string)
-	for _, r := range routes {
+	for _, r := range existingRoutes {
 		for _, m := range strings.Split(r.Method, ",") {
 			takenMethods[m] = r.ServiceName
 			if m == "*" {
-				return true
+				return existingRoutes
 			}
 		}
 	}
 	for _, m := range strings.Split(route.Method, ",") {
-		if takenMethods[m] != "" && takenMethods[m] != route.ServiceName {
-			return true
+		if m == "*" {
+			return existingRoutes
+		}
+		if takenMethods[m] != "" {
+			overlapRoutes = append(overlapRoutes, GetRouteByRouteAndService(route.Route, takenMethods[m]))
 		}
 	}
-	return false
+	return overlapRoutes
 }
 
 func DeleteRoute(id string) {
 	if config.StorageMode == "sql" {
-		database.DB.Where("route = ?", id).Delete(&model.Route{})
+		database.DB.Where("id = ?", id).Delete(&model.Route{})
 	} else {
 		for i, r := range database.Local.Routes {
-			if r.Route == id {
+			if r.ID == id {
 				database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
 				break
 			}
