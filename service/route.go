@@ -110,21 +110,21 @@ func DeleteRoute(id string) {
 	utils.SugarLogger.Infof("route with id %s deleted", id)
 }
 
-func MatchRoute(route string) model.Service {
+func MatchRoute(route string, method string) model.Service {
 	if utils.SugarLogger.Level().String() == "debug" {
 		PrintRouteGraph()
 	}
 	var service model.Service
 	graph := GetRouteGraph()
 	utils.SugarLogger.Debugf("Matching route  /" + route)
-	matchedRoute := TraverseGraph("", route, graph)
+	matchedRoute := TraverseGraph("", route, method, graph)
 	if matchedRoute == "" {
 		utils.SugarLogger.Errorf("No route found for /%s", route)
 		return service
 	}
 	utils.SugarLogger.Debugf("Matched to " + matchedRoute)
 	for _, r := range GetAllRoutes() {
-		if r.Route == matchedRoute {
+		if r.Route == matchedRoute && (strings.Contains(r.Method, method) || strings.Contains(r.Method, "*")) {
 			service.Name = r.ServiceName
 			break
 		}
@@ -143,42 +143,49 @@ func MatchRoute(route string) model.Service {
 	return service
 }
 
-func TraverseGraph(path string, route string, graph map[string][]model.RouteNode) string {
+func TraverseGraph(path string, route string, method string, graph map[string][]model.RouteNode) string {
 	currPathCount := strings.Count(path, "/")
 	routeSlugCount := strings.Count("/"+route, "/")
 	lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 	pathWithoutLastSlug := strings.TrimSuffix(path, "/"+lastSlug)
 
-	utils.SugarLogger.Debugf("Traversing graph\nwith path %s\nand route /%s", path, route)
+	utils.SugarLogger.Debugf("Traversing graph with path \"%s\" and route \"/%s\"", path, route)
 
 	if pathWithoutLastSlug == "" {
 		pathWithoutLastSlug = "/"
 	}
-	if lastSlug != "" && HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == -1 {
-		utils.SugarLogger.Debugf("Child path %s does not exist", lastSlug)
+	cindex := HasChildPath(lastSlug, graph[pathWithoutLastSlug])
+	if lastSlug != "" && cindex == -1 {
+		utils.SugarLogger.Debugf("Child path \"%s\" does not exist", lastSlug)
 		return ""
 	}
-	if lastSlug == "**" {
+	if lastSlug == "**" && CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) {
 		utils.SugarLogger.Debugf("Found all path wildcard (**)")
 		return path
 	}
-	utils.SugarLogger.Debugf("Child path %s exists", lastSlug)
+	utils.SugarLogger.Debugf("Child path \"%s\" exists", lastSlug)
 
 	if currPathCount == routeSlugCount {
 		utils.SugarLogger.Debugf("Reached end of route")
-		return path
+		if CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) {
+			utils.SugarLogger.Debugf("Route can handle method %s", method)
+			return path
+		} else {
+			utils.SugarLogger.Debugf("Route cannot handle method %s", method)
+			return ""
+		}
 	}
 
 	nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
-	slugBranch := TraverseGraph(path+"/"+nextSlug, route, graph)
+	slugBranch := TraverseGraph(path+"/"+nextSlug, route, method, graph)
 	if slugBranch != "" {
 		return slugBranch
 	}
-	anyBranch := TraverseGraph(path+"/*", route, graph)
+	anyBranch := TraverseGraph(path+"/*", route, method, graph)
 	if anyBranch != "" {
 		return anyBranch
 	}
-	allBranch := TraverseGraph(path+"/**", route, graph)
+	allBranch := TraverseGraph(path+"/**", route, method, graph)
 	if allBranch != "" {
 		return allBranch
 	}
@@ -193,6 +200,15 @@ func HasChildPath(path string, children []model.RouteNode) int {
 		}
 	}
 	return -1
+}
+
+func CanRouteHandleMethod(route model.RouteNode, method string) bool {
+	for _, s := range route.Services {
+		if strings.Contains(s.Method, method) || strings.Contains(s.Method, "*") {
+			return true
+		}
+	}
+	return false
 }
 
 func GetRouteGraph() map[string][]model.RouteNode {

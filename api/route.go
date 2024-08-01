@@ -62,7 +62,7 @@ func MatchRoute(c *gin.Context) {
 		return
 	}
 
-	result := service.MatchRoute(route)
+	result := service.MatchRoute(route, method)
 	if result.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("No route [%s] /%s found", method, route)})
 		return
