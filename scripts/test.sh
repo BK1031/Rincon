@@ -14,3 +14,4 @@ fi
 
 source scripts/test-env.sh
 go test ./... -race -covermode=atomic -coverprofile=coverage.out
+go tool cover -html coverage.out -o coverage.html

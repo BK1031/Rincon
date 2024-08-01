@@ -25,6 +25,8 @@ func TestMain(m *testing.M) {
 	// Test SQL connection failure before spinning up testcontainers
 	config.StorageMode = "sql"
 	database.InitializeDB()
+	config.DatabaseDriver = "mysql"
+	database.InitializeDB()
 	config.DatabaseDriver = "postgres"
 	database.InitializeDB()
 
