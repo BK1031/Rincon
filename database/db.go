@@ -13,8 +13,6 @@ var dbRetries = 0
 func InitializeDB() {
 	if config.StorageMode == "sql" {
 		InitializeSQL()
-	} else if config.StorageMode == "redis" {
-		// InitializeRedisDB()
 	} else {
 		InitializeLocal()
 	}
