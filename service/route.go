@@ -34,16 +34,30 @@ func GetNumRoutes() int {
 func GetRouteByID(id string) model.Route {
 	var route model.Route
 	if config.StorageMode == "sql" {
-		database.DB.Where("route = ?", id).First(&route)
+		database.DB.Where("id = ?", id).First(&route)
 	} else {
 		for _, r := range database.Local.Routes {
-			if r.Route == id {
+			if r.ID == id {
 				route = r
 				break
 			}
 		}
 	}
 	return route
+}
+
+func GetRoutesByRoute(route string) []model.Route {
+	routes := make([]model.Route, 0)
+	if config.StorageMode == "sql" {
+		database.DB.Where("route = ?", route).Find(&routes)
+	} else {
+		for _, r := range database.Local.Routes {
+			if r.Route == route {
+				routes = append(routes, r)
+			}
+		}
+	}
+	return routes
 }
 
 func GetRoutesByServiceName(name string) []model.Route {
@@ -61,6 +75,26 @@ func GetRoutesByServiceName(name string) []model.Route {
 	return routes
 }
 
+func GetRouteByRouteAndMethod(route string, method string) model.Route {
+	routes := GetRoutesByRoute(route)
+	for _, r := range routes {
+		if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") {
+			return r
+		}
+	}
+	return model.Route{}
+}
+
+func GetRouteByRouteAndService(route string, service string) model.Route {
+	routes := GetRoutesByRoute(route)
+	for _, r := range routes {
+		if r.ServiceName == service {
+			return r
+		}
+	}
+	return model.Route{}
+}
+
 func CreateRoute(route model.Route) error {
 	if route.Route == "" {
 		return fmt.Errorf("route cannot be empty")
@@ -71,29 +105,50 @@ func CreateRoute(route model.Route) error {
 	} else if !route.IsMethodValid() {
 		return fmt.Errorf("invalid method %s", route.Method)
 	}
+	route.ID = route.Route + "-" + route.Method
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	route.CreatedAt = time.Now()
 
-	if GetRouteByID(route.Route).Route != "" {
-		if route.ServiceName != GetRouteByID(route.Route).ServiceName {
-			if config.OverwriteRoutes == "true" {
-				DeleteRoute(route.Route)
-			} else {
-				utils.SugarLogger.Errorf("route with id %s already exists", route.Route)
-				return fmt.Errorf("route with id %s already exists", route.Route)
-			}
+	if IsRouteMethodOverlap(route) {
+		if config.OverwriteRoutes == "true" {
+			DeleteRoute(route.ID)
 		} else {
-			utils.SugarLogger.Debugf("route with id %s for service %s already exists", route.Route, route.ServiceName)
-			return nil
+			return fmt.Errorf("route with id %s overlaps with an existing route", route.ID)
+		}
+	} else if existingRoute := GetRouteByRouteAndService(route.Route, route.ServiceName); existingRoute.ID != "" {
+		utils.SugarLogger.Debugf("route with route %s for service %s already exists", route.Route, route.ServiceName)
+		if existingRoute.Method != route.Method {
+			utils.SugarLogger.Debugf("route has different method, replacing existing route")
+			DeleteRoute(existingRoute.ID)
 		}
 	}
+
 	if config.StorageMode == "sql" {
 		database.DB.Create(&route)
 	} else {
 		database.Local.Routes = append(database.Local.Routes, route)
 	}
-	utils.SugarLogger.Infof("route with id %s registered for service %s", route.Route, route.ServiceName)
+	utils.SugarLogger.Infof("route with id %s registered for service %s", route.ID, route.ServiceName)
 	return nil
+}
+
+func IsRouteMethodOverlap(route model.Route) bool {
+	routes := GetRoutesByRoute(route.Route)
+	takenMethods := make(map[string]string)
+	for _, r := range routes {
+		for _, m := range strings.Split(r.Method, ",") {
+			takenMethods[m] = r.ServiceName
+			if m == "*" {
+				return true
+			}
+		}
+	}
+	for _, m := range strings.Split(route.Method, ",") {
+		if takenMethods[m] != "" && takenMethods[m] != route.ServiceName {
+			return true
+		}
+	}
+	return false
 }
 
 func DeleteRoute(id string) {

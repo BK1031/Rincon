@@ -10,8 +10,9 @@ import (
 var validMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "*"}
 
 type Route struct {
-	Route       string    `json:"route" gorm:"primaryKey"`
-	Method      string    `json:"method" gorm:"primaryKey"`
+	ID          string    `json:"id" gorm:"primaryKey"`
+	Route       string    `json:"route"`
+	Method      string    `json:"method"`
 	ServiceName string    `json:"service_name"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
