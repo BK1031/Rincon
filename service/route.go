@@ -90,7 +90,7 @@ func CreateRoute(route model.Route) error {
 	} else if !route.IsMethodValid() {
 		return fmt.Errorf("invalid method %s", route.Method)
 	}
-	route.ID = route.Route + "-" + route.Method
+	route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	route.CreatedAt = time.Now()
 
