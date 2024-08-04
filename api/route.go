@@ -10,11 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllRoutes(c *gin.Context) {
-	result := service.GetAllRoutes()
-	c.JSON(http.StatusOK, result)
-}
-
 func GetRoute(c *gin.Context) {
 	r := c.Query("route")
 	r = strings.TrimPrefix(r, "/")
@@ -24,7 +19,7 @@ func GetRoute(c *gin.Context) {
 	s := c.Query("service")
 
 	if r == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Route query is required"})
+		c.JSON(http.StatusOK, service.GetAllRoutes())
 		return
 	}
 	if s != "" {

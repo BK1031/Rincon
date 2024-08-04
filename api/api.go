@@ -34,8 +34,7 @@ func InitializeRoutes(router *gin.Engine) {
 	rincon.DELETE("/services/:name", RemoveService)
 	rincon.GET("/services/:name/routes", GetRoutesForService)
 	rincon.POST("/services", CreateService)
-	rincon.GET("/routes", GetAllRoutes)
-	rincon.GET("/routes/:id", GetRoute)
+	rincon.GET("/routes", GetRoute)
 	rincon.POST("/routes", CreateRoute)
 	rincon.GET("/match", MatchRoute)
 }

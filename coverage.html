@@ -59,7 +59,7 @@
 				
 				<option value="file1">rincon/api/ping.go (100.0%)</option>
 				
-				<option value="file2">rincon/api/route.go (0.0%)</option>
+				<option value="file2">rincon/api/route.go (48.1%)</option>
 				
 				<option value="file3">rincon/api/service.go (100.0%)</option>
 				
@@ -124,11 +124,11 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine <span class="cov7" title="6">{
-        if config.Env == "PROD" </span><span class="cov7" title="6">{
+func SetupRouter() *gin.Engine <span class="cov7" title="7">{
+        if config.Env == "PROD" </span><span class="cov7" title="7">{
                 gin.SetMode(gin.ReleaseMode)
         }</span>
-        <span class="cov7" title="6">r := gin.Default()
+        <span class="cov7" title="7">r := gin.Default()
         r.Use(cors.New(cors.Config{
                 AllowAllOrigins:  true,
                 AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
@@ -140,36 +140,35 @@ func SetupRouter() *gin.Engine <span class="cov7" title="6">{
         return r</span>
 }
 
-func InitializeRoutes(router *gin.Engine) <span class="cov7" title="6">{
-        rincon := router.Group("/rincon", func(c *gin.Context) </span>{<span class="cov9" title="10">}</span>)
-        <span class="cov7" title="6">rincon.GET("/ping", Ping)
+func InitializeRoutes(router *gin.Engine) <span class="cov7" title="7">{
+        rincon := router.Group("/rincon", func(c *gin.Context) </span>{<span class="cov9" title="16">}</span>)
+        <span class="cov7" title="7">rincon.GET("/ping", Ping)
         rincon.GET("/services", GetAllServices)
         rincon.GET("/services/:name", GetService)
         rincon.DELETE("/services/:name", RemoveService)
         rincon.GET("/services/:name/routes", GetRoutesForService)
         rincon.POST("/services", CreateService)
-        rincon.GET("/routes", GetAllRoutes)
-        rincon.GET("/routes/:id", GetRoute)
+        rincon.GET("/routes", GetRoute)
         rincon.POST("/routes", CreateRoute)
         rincon.GET("/match", MatchRoute)</span>
 }
 
-func AuthMiddleware() gin.HandlerFunc <span class="cov7" title="6">{
-        return func(c *gin.Context) </span><span class="cov10" title="12">{
-                if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "DELETE" </span><span class="cov8" title="7">{
+func AuthMiddleware() gin.HandlerFunc <span class="cov7" title="7">{
+        return func(c *gin.Context) </span><span class="cov10" title="18">{
+                if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "DELETE" </span><span class="cov7" title="7">{
                         auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
                         if len(auth) != 2 || auth[0] != "Basic" </span><span class="cov1" title="1">{
                                 c.AbortWithStatusJSON(401, gin.H{"message": "Request not authorized"})
                                 return
                         }</span>
-                        <span class="cov7" title="6">payload, _ := base64.StdEncoding.DecodeString(auth[1])
+                        <span class="cov6" title="6">payload, _ := base64.StdEncoding.DecodeString(auth[1])
                         pair := strings.SplitN(string(payload), ":", 2)
                         if len(pair) != 2 || pair[0] != config.AuthUser || pair[1] != config.AuthPassword </span><span class="cov1" title="1">{
                                 c.AbortWithStatusJSON(401, gin.H{"message": "Invalid credentials"})
                                 return
                         }</span>
                 }
-                <span class="cov9" title="10">c.Next()</span>
+                <span class="cov9" title="16">c.Next()</span>
         }
 }
 </pre>
@@ -203,12 +202,7 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func GetAllRoutes(c *gin.Context) <span class="cov0" title="0">{
-        result := service.GetAllRoutes()
-        c.JSON(http.StatusOK, result)
-}</span>
-
-func GetRoute(c *gin.Context) <span class="cov0" title="0">{
+func GetRoute(c *gin.Context) <span class="cov10" title="6">{
         r := c.Query("route")
         r = strings.TrimPrefix(r, "/")
         r = strings.TrimSuffix(r, "/")
@@ -216,27 +210,27 @@ func GetRoute(c *gin.Context) <span class="cov0" title="0">{
         m = strings.ToUpper(m)
         s := c.Query("service")
 
-        if r == "" </span><span class="cov0" title="0">{
-                c.JSON(http.StatusBadRequest, gin.H{"message": "Route query is required"})
+        if r == "" </span><span class="cov1" title="1">{
+                c.JSON(http.StatusOK, service.GetAllRoutes())
                 return
         }</span>
-        <span class="cov0" title="0">if s != "" </span><span class="cov0" title="0">{
+        <span class="cov9" title="5">if s != "" </span><span class="cov4" title="2">{
                 requestedRoute := service.GetRouteByRouteAndService(r, s)
-                if requestedRoute.ID == "" </span><span class="cov0" title="0">{
+                if requestedRoute.ID == "" </span><span class="cov1" title="1">{
                         c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("No route /%s for service %s found", r, s)})
                         return
                 }</span>
-                <span class="cov0" title="0">c.JSON(http.StatusOK, requestedRoute)
+                <span class="cov1" title="1">c.JSON(http.StatusOK, requestedRoute)
                 return</span>
-        } else<span class="cov0" title="0"> if m != "" </span><span class="cov0" title="0">{
+        } else<span class="cov6" title="3"> if m != "" </span><span class="cov4" title="2">{
                 requestedRoute := service.GetRouteByRouteAndMethod(r, m)
-                if requestedRoute.ID == "" </span><span class="cov0" title="0">{
+                if requestedRoute.ID == "" </span><span class="cov1" title="1">{
                         c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("No route [%s] /%s found", m, r)})
                         return
                 }</span>
-                <span class="cov0" title="0">c.JSON(http.StatusOK, requestedRoute)
+                <span class="cov1" title="1">c.JSON(http.StatusOK, requestedRoute)
                 return</span>
-        } else<span class="cov0" title="0"> {
+        } else<span class="cov1" title="1"> {
                 c.JSON(http.StatusOK, service.GetRoutesByRoute(r))
                 return
         }</span>
@@ -696,6 +690,9 @@ func GetNumRoutes() int <span class="cov3" title="4">{
 }
 
 func GetRoutesByRoute(route string) []model.Route <span class="cov8" title="116">{
+        route = strings.TrimPrefix(route, "/")
+        route = strings.TrimSuffix(route, "/")
+        route = "/" + route
         routes := make([]model.Route, 0)
         if config.StorageMode == "sql" </span><span class="cov7" title="52">{
                 database.DB.Where("route = ?", route).Find(&amp;routes)
@@ -725,6 +722,9 @@ func GetRoutesByServiceName(name string) []model.Route <span class="cov3" title=
 }
 
 func GetRouteByRouteAndMethod(route string, method string) model.Route <span class="cov4" title="8">{
+        route = strings.TrimPrefix(route, "/")
+        route = strings.TrimSuffix(route, "/")
+        route = "/" + route
         routes := GetRoutesByRoute(route)
         for _, r := range routes </span><span class="cov3" title="6">{
                 if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") </span><span class="cov3" title="6">{
@@ -735,6 +735,9 @@ func GetRouteByRouteAndMethod(route string, method string) model.Route <span cla
 }
 
 func GetRouteByRouteAndService(route string, service string) model.Route <span class="cov6" title="26">{
+        route = strings.TrimPrefix(route, "/")
+        route = strings.TrimSuffix(route, "/")
+        route = "/" + route
         service = utils.NormalizeName(service)
         routes := GetRoutesByRoute(route)
         for _, r := range routes </span><span class="cov6" title="30">{
@@ -745,11 +748,13 @@ func GetRouteByRouteAndService(route string, service string) model.Route <span c
         <span class="cov3" title="4">return model.Route{}</span>
 }
 
-func CreateRoute(route model.Route) error <span class="cov7" title="75">{
+func CreateRoute(route model.Route) error <span class="cov7" title="77">{
         if route.Route == "" </span><span class="cov2" title="2">{
                 return fmt.Errorf("route cannot be empty")
-        }</span> else<span class="cov7" title="73"> if route.ServiceName == "" </span><span class="cov2" title="2">{
+        }</span> else<span class="cov7" title="75"> if route.ServiceName == "" </span><span class="cov2" title="2">{
                 return fmt.Errorf("service name cannot be empty")
+        }</span> else<span class="cov7" title="73"> if !strings.HasPrefix(route.Route, "/") </span><span class="cov2" title="2">{
+                return fmt.Errorf("route must start with a slash")
         }</span> else<span class="cov7" title="71"> if strings.HasSuffix(route.Route, "/") </span><span class="cov2" title="2">{
                 return fmt.Errorf("route cannot end with a slash")
         }</span> else<span class="cov7" title="69"> if !route.IsMethodValid() </span><span class="cov3" title="5">{

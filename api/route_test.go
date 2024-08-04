@@ -1,36 +1,63 @@
 package api
 
-// func TestGetAllRoutes(t *testing.T) {
-// 	router := SetupRouter()
-// 	InitializeRoutes(router)
-// 	w := httptest.NewRecorder()
-// 	req, _ := http.NewRequest("GET", "/rincon/routes", nil)
-// 	router.ServeHTTP(w, req)
-// 	if w.Code != 200 {
-// 		t.Errorf("Expected status code 200, got %v", w.Code)
-// 	}
-// }
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
-// func TestGetRoute(t *testing.T) {
-// 	router := SetupRouter()
-// 	InitializeRoutes(router)
-// 	t.Run("Get Route By ID", func(t *testing.T) {
-// 		w := httptest.NewRecorder()
-// 		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping", nil)
-// 		router.ServeHTTP(w, req)
-// 		if w.Code != 200 {
-// 			t.Errorf("Expected status code 200, got %v", w.Code)
-// 		}
-// 	})
-// 	t.Run("Get Route Not Found", func(t *testing.T) {
-// 		w := httptest.NewRecorder()
-// 		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/bruh", nil)
-// 		router.ServeHTTP(w, req)
-// 		if w.Code != 404 {
-// 			t.Errorf("Expected status code 404, got %v", w.Code)
-// 		}
-// 	})
-// }
+func TestGetRoute(t *testing.T) {
+	router := SetupRouter()
+	InitializeRoutes(router)
+	t.Run("Get All Routes", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 200 {
+			t.Errorf("Expected status code 200, got %v", w.Code)
+		}
+	})
+	t.Run("Get Routes By Route", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 200 {
+			t.Errorf("Expected status code 200, got %v", w.Code)
+		}
+	})
+	t.Run("Get Routes By Route And Service", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping&service=rincon", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 200 {
+			t.Errorf("Expected status code 200, got %v", w.Code)
+		}
+	})
+	t.Run("Get Routes By Route And Service Not Found", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping&service=montecito", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 404 {
+			t.Errorf("Expected status code 404, got %v", w.Code)
+		}
+	})
+	t.Run("Get Routes By Route And Method", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping&method=GET", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 200 {
+			t.Errorf("Expected status code 200, got %v", w.Code)
+		}
+	})
+	t.Run("Get Routes By Route And Method Not Found", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/rincon/routes?route=/rincon/ping/wow&method=POST", nil)
+		router.ServeHTTP(w, req)
+		if w.Code != 404 {
+			t.Errorf("Expected status code 404, got %v", w.Code)
+		}
+	})
+}
 
 // func TestGetRoutesForService(t *testing.T) {
 // 	router := SetupRouter()

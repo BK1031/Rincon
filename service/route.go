@@ -32,6 +32,9 @@ func GetNumRoutes() int {
 }
 
 func GetRoutesByRoute(route string) []model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
 	routes := make([]model.Route, 0)
 	if config.StorageMode == "sql" {
 		database.DB.Where("route = ?", route).Find(&routes)
@@ -61,6 +64,9 @@ func GetRoutesByServiceName(name string) []model.Route {
 }
 
 func GetRouteByRouteAndMethod(route string, method string) model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
 	routes := GetRoutesByRoute(route)
 	for _, r := range routes {
 		if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") {
@@ -71,6 +77,9 @@ func GetRouteByRouteAndMethod(route string, method string) model.Route {
 }
 
 func GetRouteByRouteAndService(route string, service string) model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
 	service = utils.NormalizeName(service)
 	routes := GetRoutesByRoute(route)
 	for _, r := range routes {
@@ -86,6 +95,8 @@ func CreateRoute(route model.Route) error {
 		return fmt.Errorf("route cannot be empty")
 	} else if route.ServiceName == "" {
 		return fmt.Errorf("service name cannot be empty")
+	} else if !strings.HasPrefix(route.Route, "/") {
+		return fmt.Errorf("route must start with a slash")
 	} else if strings.HasSuffix(route.Route, "/") {
 		return fmt.Errorf("route cannot end with a slash")
 	} else if !route.IsMethodValid() {
