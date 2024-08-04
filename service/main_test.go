@@ -18,6 +18,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	config.Env = "DEV"
 	utils.InitializeLogger()
 	utils.VerifyConfig()
 	database.InitializeDB()

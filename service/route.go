@@ -188,14 +188,10 @@ func MatchRoute(route string, method string) model.Service {
 			break
 		}
 	}
-	if service.Name == "" {
-		utils.SugarLogger.Errorf("No service found for route /%s", route)
-		go DeleteRoute(matchedRoute)
-		return service
-	}
 	service = LoadBalance(service.Name, "random")
 	if service.ID == 0 {
-		utils.SugarLogger.Infoln("No eligible service instance found for" + service.Name)
+		utils.SugarLogger.Infoln("No eligible service instance found for route /" + route)
+		go DeleteRoute(matchedRoute)
 	} else {
 		utils.SugarLogger.Infof("Matched route /%s to %s for service %s (%d)", route, matchedRoute, service.Name, service.ID)
 	}

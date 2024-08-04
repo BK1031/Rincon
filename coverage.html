@@ -77,11 +77,11 @@
 				
 				<option value="file10">rincon/model/service.go (100.0%)</option>
 				
-				<option value="file11">rincon/service/balancer.go (0.0%)</option>
+				<option value="file11">rincon/service/balancer.go (100.0%)</option>
 				
 				<option value="file12">rincon/service/heartbeat.go (100.0%)</option>
 				
-				<option value="file13">rincon/service/route.go (43.2%)</option>
+				<option value="file13">rincon/service/route.go (100.0%)</option>
 				
 				<option value="file14">rincon/service/service.go (97.7%)</option>
 				
@@ -516,14 +516,14 @@ func (Route) TableName() string <span class="cov2" title="2">{
         return config.DatabaseTablePrefix + "route"
 }</span>
 
-func (r *Route) IsMethodValid() bool <span class="cov9" title="39">{
+func (r *Route) IsMethodValid() bool <span class="cov9" title="75">{
         methods := strings.Split(r.Method, ",")
-        for _, method := range methods </span><span class="cov10" title="42">{
-                if !slices.Contains(validMethods, method) </span><span class="cov1" title="1">{
+        for _, method := range methods </span><span class="cov10" title="81">{
+                if !slices.Contains(validMethods, method) </span><span class="cov4" title="5">{
                         return false
                 }</span>
         }
-        <span class="cov9" title="38">return true</span>
+        <span class="cov9" title="70">return true</span>
 }
 
 type RouteNode struct {
@@ -579,19 +579,19 @@ import (
         "rincon/model"
 )
 
-func LoadBalance(serviceName string, balancer string) model.Service <span class="cov0" title="0">{
+func LoadBalance(serviceName string, balancer string) model.Service <span class="cov10" title="6">{
         var service model.Service
         services := GetServicesByName(serviceName)
-        if len(services) == 0 </span><span class="cov0" title="0">{
+        if len(services) == 0 </span><span class="cov4" title="2">{
                 return service
         }</span>
-        <span class="cov0" title="0">if balancer == "random" </span><span class="cov0" title="0">{
+        <span class="cov7" title="4">if balancer == "random" </span><span class="cov7" title="4">{
                 service = RandomSelector(services)
         }</span>
-        <span class="cov0" title="0">return service</span>
+        <span class="cov7" title="4">return service</span>
 }
 
-func RandomSelector(services []model.Service) model.Service <span class="cov0" title="0">{
+func RandomSelector(services []model.Service) model.Service <span class="cov7" title="4">{
         return services[rand.Intn(len(services))]
 }</span>
 </pre>
@@ -674,18 +674,18 @@ import (
         "time"
 )
 
-func GetAllRoutes() []model.Route <span class="cov3" title="3">{
+func GetAllRoutes() []model.Route <span class="cov6" title="29">{
         routes := make([]model.Route, 0)
-        if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+        if config.StorageMode == "sql" </span><span class="cov2" title="3">{
                 database.DB.Find(&amp;routes)
-        }</span> else<span class="cov3" title="3"> {
+        }</span> else<span class="cov6" title="26"> {
                 routes = database.Local.Routes
         }</span>
-        <span class="cov3" title="3">return routes</span>
+        <span class="cov6" title="29">return routes</span>
 }
 
-func GetNumRoutes() int <span class="cov2" title="2">{
-        if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+func GetNumRoutes() int <span class="cov3" title="4">{
+        if config.StorageMode == "sql" </span><span class="cov2" title="2">{
                 var count int64
                 database.DB.Model(&amp;model.Route{}).Count(&amp;count)
                 return int(count)
@@ -695,178 +695,174 @@ func GetNumRoutes() int <span class="cov2" title="2">{
         }</span>
 }
 
-func GetRoutesByRoute(route string) []model.Route <span class="cov9" title="58">{
+func GetRoutesByRoute(route string) []model.Route <span class="cov8" title="116">{
         routes := make([]model.Route, 0)
-        if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+        if config.StorageMode == "sql" </span><span class="cov7" title="52">{
                 database.DB.Where("route = ?", route).Find(&amp;routes)
-        }</span> else<span class="cov9" title="58"> {
-                for _, r := range database.Local.Routes </span><span class="cov10" title="67">{
-                        if r.Route == route </span><span class="cov8" title="41">{
+        }</span> else<span class="cov7" title="64"> {
+                for _, r := range database.Local.Routes </span><span class="cov7" title="82">{
+                        if r.Route == route </span><span class="cov6" title="42">{
                                 routes = append(routes, r)
                         }</span>
                 }
         }
-        <span class="cov9" title="58">return routes</span>
+        <span class="cov8" title="116">return routes</span>
 }
 
-func GetRoutesByServiceName(name string) []model.Route <span class="cov3" title="3">{
+func GetRoutesByServiceName(name string) []model.Route <span class="cov3" title="6">{
         name = utils.NormalizeName(name)
         routes := make([]model.Route, 0)
-        if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+        if config.StorageMode == "sql" </span><span class="cov2" title="3">{
                 database.DB.Where("service_name = ?", name).Find(&amp;routes)
-        }</span> else<span class="cov3" title="3"> {
-                for _, r := range database.Local.Routes </span><span class="cov4" title="5">{
-                        if r.ServiceName == name </span><span class="cov3" title="3">{
+        }</span> else<span class="cov2" title="3"> {
+                for _, r := range database.Local.Routes </span><span class="cov3" title="5">{
+                        if r.ServiceName == name </span><span class="cov2" title="3">{
                                 routes = append(routes, r)
                         }</span>
                 }
         }
-        <span class="cov3" title="3">return routes</span>
+        <span class="cov3" title="6">return routes</span>
 }
 
-func GetRouteByRouteAndMethod(route string, method string) model.Route <span class="cov3" title="4">{
+func GetRouteByRouteAndMethod(route string, method string) model.Route <span class="cov4" title="8">{
         routes := GetRoutesByRoute(route)
-        for _, r := range routes </span><span class="cov3" title="3">{
-                if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") </span><span class="cov3" title="3">{
-                        return r
-                }</span>
-        }
-        <span class="cov1" title="1">return model.Route{}</span>
-}
-
-func GetRouteByRouteAndService(route string, service string) model.Route <span class="cov6" title="13">{
-        service = utils.NormalizeName(service)
-        routes := GetRoutesByRoute(route)
-        for _, r := range routes </span><span class="cov6" title="15">{
-                if r.ServiceName == service </span><span class="cov6" title="11">{
+        for _, r := range routes </span><span class="cov3" title="6">{
+                if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") </span><span class="cov3" title="6">{
                         return r
                 }</span>
         }
         <span class="cov2" title="2">return model.Route{}</span>
 }
 
-func CreateRoute(route model.Route) error <span class="cov8" title="36">{
-        if route.Route == "" </span><span class="cov1" title="1">{
+func GetRouteByRouteAndService(route string, service string) model.Route <span class="cov6" title="26">{
+        service = utils.NormalizeName(service)
+        routes := GetRoutesByRoute(route)
+        for _, r := range routes </span><span class="cov6" title="30">{
+                if r.ServiceName == service </span><span class="cov5" title="22">{
+                        return r
+                }</span>
+        }
+        <span class="cov3" title="4">return model.Route{}</span>
+}
+
+func CreateRoute(route model.Route) error <span class="cov7" title="75">{
+        if route.Route == "" </span><span class="cov2" title="2">{
                 return fmt.Errorf("route cannot be empty")
-        }</span> else<span class="cov8" title="35"> if route.ServiceName == "" </span><span class="cov1" title="1">{
+        }</span> else<span class="cov7" title="73"> if route.ServiceName == "" </span><span class="cov2" title="2">{
                 return fmt.Errorf("service name cannot be empty")
-        }</span> else<span class="cov8" title="34"> if strings.HasSuffix(route.Route, "/") </span><span class="cov1" title="1">{
+        }</span> else<span class="cov7" title="71"> if strings.HasSuffix(route.Route, "/") </span><span class="cov2" title="2">{
                 return fmt.Errorf("route cannot end with a slash")
-        }</span> else<span class="cov8" title="33"> if !route.IsMethodValid() </span><span class="cov1" title="1">{
+        }</span> else<span class="cov7" title="69"> if !route.IsMethodValid() </span><span class="cov3" title="5">{
                 return fmt.Errorf("invalid method %s", route.Method)
         }</span>
-        <span class="cov8" title="32">route.Method = strings.ToUpper(route.Method)
+        <span class="cov7" title="64">route.Method = strings.ToUpper(route.Method)
         route.ServiceName = utils.NormalizeName(route.ServiceName)
         route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
         route.CreatedAt = time.Now()
 
         overlapRoutes := GetOverlappingRoutes(route)
-        if len(overlapRoutes) == 1 &amp;&amp; overlapRoutes[0].ServiceName == route.ServiceName </span><span class="cov1" title="1">{
+        if len(overlapRoutes) == 1 &amp;&amp; overlapRoutes[0].ServiceName == route.ServiceName </span><span class="cov2" title="2">{
                 utils.SugarLogger.Debugf("replacing existing route %s for service %s", route.Route, route.ServiceName)
                 DeleteRoute(overlapRoutes[0].ID)
-        }</span> else<span class="cov8" title="31"> if len(overlapRoutes) &gt; 0 </span><span class="cov2" title="2">{
-                if config.OverwriteRoutes == "true" </span><span class="cov1" title="1">{
-                        for _, r := range overlapRoutes </span><span class="cov2" title="2">{
+        }</span> else<span class="cov7" title="62"> if len(overlapRoutes) &gt; 0 </span><span class="cov3" title="4">{
+                if config.OverwriteRoutes == "true" </span><span class="cov2" title="2">{
+                        for _, r := range overlapRoutes </span><span class="cov3" title="4">{
                                 DeleteRoute(r.ID)
                         }</span>
-                } else<span class="cov1" title="1"> {
+                } else<span class="cov2" title="2"> {
                         return fmt.Errorf("route with id %s overlaps with existing routes [%s]", route.ID, PrintRouteArray(overlapRoutes))
                 }</span>
         }
 
-        <span class="cov8" title="31">if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+        <span class="cov7" title="62">if config.StorageMode == "sql" </span><span class="cov6" title="25">{
                 database.DB.Create(&amp;route)
-        }</span> else<span class="cov8" title="31"> {
+        }</span> else<span class="cov6" title="37"> {
                 database.Local.Routes = append(database.Local.Routes, route)
         }</span>
-        <span class="cov8" title="31">utils.SugarLogger.Infof("route with id %s registered for service %s", route.ID, route.ServiceName)
+        <span class="cov7" title="62">utils.SugarLogger.Infof("route with id %s registered for service %s", route.ID, route.ServiceName)
         return nil</span>
 }
 
-func PrintRouteArray(routes []model.Route) string <span class="cov1" title="1">{
+func PrintRouteArray(routes []model.Route) string <span class="cov2" title="2">{
         s := ""
-        for i, r := range routes </span><span class="cov2" title="2">{
+        for i, r := range routes </span><span class="cov3" title="4">{
                 s += fmt.Sprintf("[%s] %s (%s)", r.Method, r.Route, r.ServiceName)
-                if i != len(routes)-1 </span><span class="cov1" title="1">{
+                if i != len(routes)-1 </span><span class="cov2" title="2">{
                         s += ", "
                 }</span>
         }
-        <span class="cov1" title="1">return s</span>
+        <span class="cov2" title="2">return s</span>
 }
 
-func GetOverlappingRoutes(route model.Route) []model.Route <span class="cov8" title="38">{
+func GetOverlappingRoutes(route model.Route) []model.Route <span class="cov7" title="76">{
         route.Method = strings.ToUpper(route.Method)
         route.ServiceName = utils.NormalizeName(route.ServiceName)
         overlapRoutes := make([]model.Route, 0)
         existingRoutes := GetRoutesByRoute(route.Route)
         takenMethods := make(map[string]string)
-        for _, r := range existingRoutes </span><span class="cov7" title="17">{
-                for _, m := range strings.Split(r.Method, ",") </span><span class="cov7" title="20">{
+        for _, r := range existingRoutes </span><span class="cov6" title="35">{
+                for _, m := range strings.Split(r.Method, ",") </span><span class="cov6" title="41">{
                         takenMethods[m] = r.ServiceName
-                        if m == "*" </span><span class="cov1" title="1">{
+                        if m == "*" </span><span class="cov2" title="2">{
                                 return existingRoutes
                         }</span>
                 }
         }
-        <span class="cov8" title="37">for _, m := range strings.Split(route.Method, ",") </span><span class="cov9" title="42">{
-                if m == "*" </span><span class="cov5" title="9">{
+        <span class="cov7" title="74">for _, m := range strings.Split(route.Method, ",") </span><span class="cov7" title="84">{
+                if m == "*" </span><span class="cov5" title="16">{
                         return existingRoutes
                 }</span>
-                <span class="cov8" title="33">if takenMethods[m] != "" </span><span class="cov5" title="7">{
+                <span class="cov7" title="68">if takenMethods[m] != "" </span><span class="cov5" title="14">{
                         overlapRoutes = append(overlapRoutes, GetRouteByRouteAndService(route.Route, takenMethods[m]))
                 }</span>
         }
-        <span class="cov8" title="28">return overlapRoutes</span>
+        <span class="cov7" title="58">return overlapRoutes</span>
 }
 
-func DeleteRoute(id string) <span class="cov3" title="3">{
-        if config.StorageMode == "sql" </span><span class="cov0" title="0">{
+func DeleteRoute(id string) <span class="cov4" title="8">{
+        if config.StorageMode == "sql" </span><span class="cov2" title="3">{
                 database.DB.Where("id = ?", id).Delete(&amp;model.Route{})
-        }</span> else<span class="cov3" title="3"> {
-                for i, r := range database.Local.Routes </span><span class="cov3" title="3">{
-                        if r.ID == id </span><span class="cov3" title="3">{
+        }</span> else<span class="cov3" title="5"> {
+                for i, r := range database.Local.Routes </span><span class="cov5" title="15">{
+                        if r.ID == id </span><span class="cov2" title="3">{
                                 database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
                                 break</span>
                         }
                 }
         }
-        <span class="cov3" title="3">utils.SugarLogger.Infof("route with id %s deleted", id)</span>
+        <span class="cov4" title="8">utils.SugarLogger.Infof("route with id %s deleted", id)</span>
 }
 
-func MatchRoute(route string, method string) model.Service <span class="cov0" title="0">{
-        if utils.SugarLogger.Level().String() == "debug" </span><span class="cov0" title="0">{
+func MatchRoute(route string, method string) model.Service <span class="cov4" title="8">{
+        if utils.SugarLogger.Level().String() == "debug" </span><span class="cov4" title="8">{
                 PrintRouteGraph()
         }</span>
-        <span class="cov0" title="0">var service model.Service
+        <span class="cov4" title="8">var service model.Service
         graph := GetRouteGraph()
         utils.SugarLogger.Debugf("Matching route  /" + route)
         matchedRoute := TraverseGraph("", route, method, graph)
-        if matchedRoute == "" </span><span class="cov0" title="0">{
+        if matchedRoute == "" </span><span class="cov2" title="2">{
                 utils.SugarLogger.Errorf("No route found for /%s", route)
                 return service
         }</span>
-        <span class="cov0" title="0">utils.SugarLogger.Debugf("Matched to " + matchedRoute)
-        for _, r := range GetAllRoutes() </span><span class="cov0" title="0">{
-                if r.Route == matchedRoute &amp;&amp; (strings.Contains(r.Method, method) || strings.Contains(r.Method, "*")) </span><span class="cov0" title="0">{
+        <span class="cov3" title="6">utils.SugarLogger.Debugf("Matched to " + matchedRoute)
+        for _, r := range GetAllRoutes() </span><span class="cov5" title="21">{
+                if r.Route == matchedRoute &amp;&amp; (strings.Contains(r.Method, method) || strings.Contains(r.Method, "*")) </span><span class="cov3" title="6">{
                         service.Name = r.ServiceName
                         break</span>
                 }
         }
-        <span class="cov0" title="0">if service.Name == "" </span><span class="cov0" title="0">{
-                utils.SugarLogger.Errorf("No service found for route /%s", route)
+        <span class="cov3" title="6">service = LoadBalance(service.Name, "random")
+        if service.ID == 0 </span><span class="cov2" title="2">{
+                utils.SugarLogger.Infoln("No eligible service instance found for route /" + route)
                 go DeleteRoute(matchedRoute)
-                return service
-        }</span>
-        <span class="cov0" title="0">service = LoadBalance(service.Name, "random")
-        if service.ID == 0 </span><span class="cov0" title="0">{
-                utils.SugarLogger.Infoln("No eligible service instance found for" + service.Name)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov3" title="4"> {
                 utils.SugarLogger.Infof("Matched route /%s to %s for service %s (%d)", route, matchedRoute, service.Name, service.ID)
         }</span>
-        <span class="cov0" title="0">return service</span>
+        <span class="cov3" title="6">return service</span>
 }
 
-func TraverseGraph(path string, route string, method string, graph map[string][]model.RouteNode) string <span class="cov0" title="0">{
+func TraverseGraph(path string, route string, method string, graph map[string][]model.RouteNode) string <span class="cov6" title="39">{
         currPathCount := strings.Count(path, "/")
         routeSlugCount := strings.Count("/"+route, "/")
         lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
@@ -874,100 +870,100 @@ func TraverseGraph(path string, route string, method string, graph map[string][]
 
         utils.SugarLogger.Debugf("Traversing graph with path \"%s\" and route \"/%s\"", path, route)
 
-        if pathWithoutLastSlug == "" </span><span class="cov0" title="0">{
+        if pathWithoutLastSlug == "" </span><span class="cov5" title="20">{
                 pathWithoutLastSlug = "/"
         }</span>
-        <span class="cov0" title="0">cindex := HasChildPath(lastSlug, graph[pathWithoutLastSlug])
-        if lastSlug != "" &amp;&amp; cindex == -1 </span><span class="cov0" title="0">{
+        <span class="cov6" title="39">cindex := HasChildPath(lastSlug, graph[pathWithoutLastSlug])
+        if lastSlug != "" &amp;&amp; cindex == -1 </span><span class="cov5" title="14">{
                 utils.SugarLogger.Debugf("Child path \"%s\" does not exist", lastSlug)
                 return ""
         }</span>
-        <span class="cov0" title="0">if lastSlug == "**" &amp;&amp; CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) </span><span class="cov0" title="0">{
+        <span class="cov6" title="25">if lastSlug == "**" &amp;&amp; CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) </span><span class="cov1" title="1">{
                 utils.SugarLogger.Debugf("Found all path wildcard (**)")
                 return path
         }</span>
-        <span class="cov0" title="0">utils.SugarLogger.Debugf("Child path \"%s\" exists", lastSlug)
+        <span class="cov6" title="24">utils.SugarLogger.Debugf("Child path \"%s\" exists", lastSlug)
 
-        if currPathCount == routeSlugCount </span><span class="cov0" title="0">{
+        if currPathCount == routeSlugCount </span><span class="cov3" title="6">{
                 utils.SugarLogger.Debugf("Reached end of route")
-                if CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) </span><span class="cov0" title="0">{
+                if CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) </span><span class="cov3" title="5">{
                         utils.SugarLogger.Debugf("Route can handle method %s", method)
                         return path
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov1" title="1"> {
                         utils.SugarLogger.Debugf("Route cannot handle method %s", method)
                         return ""
                 }</span>
         }
 
-        <span class="cov0" title="0">nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
+        <span class="cov5" title="18">nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
         slugBranch := TraverseGraph(path+"/"+nextSlug, route, method, graph)
-        if slugBranch != "" </span><span class="cov0" title="0">{
+        if slugBranch != "" </span><span class="cov4" title="11">{
                 return slugBranch
         }</span>
-        <span class="cov0" title="0">anyBranch := TraverseGraph(path+"/*", route, method, graph)
-        if anyBranch != "" </span><span class="cov0" title="0">{
+        <span class="cov4" title="7">anyBranch := TraverseGraph(path+"/*", route, method, graph)
+        if anyBranch != "" </span><span class="cov1" title="1">{
                 return anyBranch
         }</span>
-        <span class="cov0" title="0">allBranch := TraverseGraph(path+"/**", route, method, graph)
-        if allBranch != "" </span><span class="cov0" title="0">{
+        <span class="cov3" title="6">allBranch := TraverseGraph(path+"/**", route, method, graph)
+        if allBranch != "" </span><span class="cov1" title="1">{
                 return allBranch
         }</span>
 
-        <span class="cov0" title="0">return ""</span>
+        <span class="cov3" title="5">return ""</span>
 }
 
-func HasChildPath(path string, children []model.RouteNode) int <span class="cov0" title="0">{
-        for i, c := range children </span><span class="cov0" title="0">{
-                if c.Path == path </span><span class="cov0" title="0">{
+func HasChildPath(path string, children []model.RouteNode) int <span class="cov9" title="247">{
+        for i, c := range children </span><span class="cov9" title="251">{
+                if c.Path == path </span><span class="cov7" title="81">{
                         return i
                 }</span>
         }
-        <span class="cov0" title="0">return -1</span>
+        <span class="cov9" title="166">return -1</span>
 }
 
-func CanRouteHandleMethod(route model.RouteNode, method string) bool <span class="cov0" title="0">{
-        for _, s := range route.Services </span><span class="cov0" title="0">{
-                if strings.Contains(s.Method, method) || strings.Contains(s.Method, "*") </span><span class="cov0" title="0">{
+func CanRouteHandleMethod(route model.RouteNode, method string) bool <span class="cov4" title="7">{
+        for _, s := range route.Services </span><span class="cov4" title="9">{
+                if strings.Contains(s.Method, method) || strings.Contains(s.Method, "*") </span><span class="cov3" title="6">{
                         return true
                 }</span>
         }
-        <span class="cov0" title="0">return false</span>
+        <span class="cov1" title="1">return false</span>
 }
 
-func GetRouteGraph() map[string][]model.RouteNode <span class="cov0" title="0">{
+func GetRouteGraph() map[string][]model.RouteNode <span class="cov5" title="17">{
         children := make(map[string][]model.RouteNode)
         routes := GetAllRoutes()
-        for _, r := range routes </span><span class="cov0" title="0">{
+        for _, r := range routes </span><span class="cov8" title="96">{
                 slugs := strings.Split(r.Route, "/")
                 parent := ""
-                for i := 0; i &lt; len(slugs); i++ </span><span class="cov0" title="0">{
-                        if slugs[i] != "" </span><span class="cov0" title="0">{
-                                if parent == "" </span><span class="cov0" title="0">{
+                for i := 0; i &lt; len(slugs); i++ </span><span class="cov10" title="304">{
+                        if slugs[i] != "" </span><span class="cov9" title="208">{
+                                if parent == "" </span><span class="cov8" title="96">{
                                         parent = "/"
                                 }</span>
-                                <span class="cov0" title="0">if _, exists := children[parent]; !exists </span><span class="cov0" title="0">{
+                                <span class="cov9" title="208">if _, exists := children[parent]; !exists </span><span class="cov7" title="80">{
                                         children[parent] = make([]model.RouteNode, 0)
                                 }</span>
-                                <span class="cov0" title="0">endpoint := false
-                                if i == len(slugs)-1 </span><span class="cov0" title="0">{
+                                <span class="cov9" title="208">endpoint := false
+                                if i == len(slugs)-1 </span><span class="cov8" title="96">{
                                         endpoint = true
                                 }</span>
-                                <span class="cov0" title="0">if index := HasChildPath(slugs[i], children[parent]); index != -1 </span><span class="cov0" title="0">{
-                                        if endpoint </span><span class="cov0" title="0">{
+                                <span class="cov9" title="208">if index := HasChildPath(slugs[i], children[parent]); index != -1 </span><span class="cov7" title="64">{
+                                        if endpoint </span><span class="cov5" title="16">{
                                                 children[parent][index].Services = append(children[parent][index].Services, model.RouteService{
                                                         ServiceName: r.ServiceName,
                                                         Method:      r.Method,
                                                 })
                                         }</span>
-                                } else<span class="cov0" title="0"> {
-                                        if endpoint </span><span class="cov0" title="0">{
+                                } else<span class="cov8" title="144"> {
+                                        if endpoint </span><span class="cov7" title="80">{
                                                 children[parent] = append(children[parent], model.RouteNode{
                                                         ID:        parent + "/" + slugs[i],
                                                         Path:      slugs[i],
                                                         Services:  []model.RouteService{{ServiceName: r.ServiceName, Method: r.Method}},
                                                         CreatedAt: time.Now(),
                                                 })
-                                        }</span> else<span class="cov0" title="0"> {
+                                        }</span> else<span class="cov7" title="64"> {
                                                 children[parent] = append(children[parent], model.RouteNode{
                                                         ID:        parent + "/" + slugs[i],
                                                         Path:      slugs[i],
@@ -976,38 +972,38 @@ func GetRouteGraph() map[string][]model.RouteNode <span class="cov0" title="0">{
                                                 })
                                         }</span>
                                 }
-                                <span class="cov0" title="0">if parent == "/" </span><span class="cov0" title="0">{
+                                <span class="cov9" title="208">if parent == "/" </span><span class="cov8" title="96">{
                                         parent += slugs[i]
-                                }</span> else<span class="cov0" title="0"> {
+                                }</span> else<span class="cov8" title="112"> {
                                         parent += "/" + slugs[i]
                                 }</span>
                         }
                 }
         }
-        <span class="cov0" title="0">return children</span>
+        <span class="cov5" title="17">return children</span>
 }
 
-func PrintRouteGraph() <span class="cov0" title="0">{
+func PrintRouteGraph() <span class="cov4" title="9">{
         println("======= ROUTE GRAPH =======")
         graph := GetRouteGraph()
-        for k, v := range graph </span><span class="cov0" title="0">{
+        for k, v := range graph </span><span class="cov6" title="40">{
                 println(k)
-                for _, n := range v </span><span class="cov0" title="0">{
+                for _, n := range v </span><span class="cov7" title="72">{
                         println("   -&gt; " + n.Path + " (" + PrintRouteServices(n.Services) + ")")
                 }</span>
         }
-        <span class="cov0" title="0">println("===========================")</span>
+        <span class="cov4" title="9">println("===========================")</span>
 }
 
-func PrintRouteServices(rs []model.RouteService) string <span class="cov0" title="0">{
+func PrintRouteServices(rs []model.RouteService) string <span class="cov7" title="72">{
         s := ""
-        for i, r := range rs </span><span class="cov0" title="0">{
+        for i, r := range rs </span><span class="cov7" title="48">{
                 s += fmt.Sprintf("[%s] %s", r.Method, r.ServiceName)
-                if i != len(rs)-1 </span><span class="cov0" title="0">{
+                if i != len(rs)-1 </span><span class="cov4" title="8">{
                         s += ", "
                 }</span>
         }
-        <span class="cov0" title="0">return s</span>
+        <span class="cov7" title="72">return s</span>
 }
 </pre>
 		
@@ -1071,56 +1067,56 @@ func GetServiceByID(id int) model.Service <span class="cov2" title="2">{
         <span class="cov2" title="2">return service</span>
 }
 
-func GetServicesByName(name string) []model.Service <span class="cov2" title="2">{
+func GetServicesByName(name string) []model.Service <span class="cov5" title="8">{
         services := make([]model.Service, 0)
         if config.StorageMode == "sql" </span><span class="cov1" title="1">{
                 database.DB.Where("name = ?", name).Find(&amp;services)
-        }</span> else<span class="cov1" title="1"> {
-                for _, s := range database.Local.Services </span><span class="cov2" title="2">{
-                        if s.Name == name </span><span class="cov2" title="2">{
+        }</span> else<span class="cov5" title="7"> {
+                for _, s := range database.Local.Services </span><span class="cov7" title="14">{
+                        if s.Name == name </span><span class="cov5" title="6">{
                                 services = append(services, s)
                         }</span>
                 }
         }
-        <span class="cov2" title="2">return services</span>
+        <span class="cov5" title="8">return services</span>
 }
 
-func GetServiceByEndpoint(endpoint string) model.Service <span class="cov10" title="38">{
+func GetServiceByEndpoint(endpoint string) model.Service <span class="cov10" title="46">{
         var service model.Service
         if config.StorageMode == "sql" </span><span class="cov8" title="24">{
                 database.DB.Where("endpoint = ?", endpoint).First(&amp;service)
-        }</span> else<span class="cov7" title="14"> {
-                for _, s := range database.Local.Services </span><span class="cov6" title="11">{
-                        if s.Endpoint == endpoint </span><span class="cov6" title="9">{
+        }</span> else<span class="cov8" title="22"> {
+                for _, s := range database.Local.Services </span><span class="cov7" title="19">{
+                        if s.Endpoint == endpoint </span><span class="cov7" title="13">{
                                 service = s
                                 break</span>
                         }
                 }
         }
-        <span class="cov10" title="38">return service</span>
+        <span class="cov10" title="46">return service</span>
 }
 
-func CreateService(service model.Service) (model.Service, error) <span class="cov8" title="23">{
+func CreateService(service model.Service) (model.Service, error) <span class="cov8" title="27">{
         if service.Name == "" </span><span class="cov1" title="1">{
                 return model.Service{}, fmt.Errorf("service name cannot be empty")
-        }</span> else<span class="cov8" title="22"> if service.Version == "" </span><span class="cov1" title="1">{
+        }</span> else<span class="cov8" title="26"> if service.Version == "" </span><span class="cov1" title="1">{
                 return model.Service{}, fmt.Errorf("service version cannot be empty")
-        }</span> else<span class="cov8" title="21"> if service.Endpoint == "" </span><span class="cov1" title="1">{
+        }</span> else<span class="cov8" title="25"> if service.Endpoint == "" </span><span class="cov1" title="1">{
                 return model.Service{}, fmt.Errorf("service endpoint cannot be empty")
-        }</span> else<span class="cov8" title="20"> if service.HealthCheck == "" </span><span class="cov1" title="1">{
+        }</span> else<span class="cov8" title="24"> if service.HealthCheck == "" </span><span class="cov1" title="1">{
                 return model.Service{}, fmt.Errorf("service health check cannot be empty")
         }</span>
-        <span class="cov8" title="19">service.Name = utils.NormalizeName(service.Name)
+        <span class="cov8" title="23">service.Name = utils.NormalizeName(service.Name)
         existing := GetServiceByEndpoint(service.Endpoint)
-        if config.StorageMode == "sql" </span><span class="cov7" title="12">{
+        if config.StorageMode == "sql" </span><span class="cov6" title="12">{
                 if existing.Endpoint != "" </span><span class="cov4" title="4">{
                         service.ID = existing.ID
                         database.DB.Model(&amp;service).Where("endpoint = ?", service.Endpoint).Updates(service)
-                }</span> else<span class="cov6" title="8"> {
+                }</span> else<span class="cov5" title="8"> {
                         service.ID = utils.GenerateID(0)
                         database.DB.Create(&amp;service)
                 }</span>
-        } else<span class="cov5" title="7"> {
+        } else<span class="cov6" title="11"> {
                 if existing.Endpoint != "" </span><span class="cov2" title="2">{
                         service.ID = existing.ID
                         service.CreatedAt = existing.CreatedAt
@@ -1131,14 +1127,14 @@ func CreateService(service model.Service) (model.Service, error) <span class="co
                                         break</span>
                                 }
                         }
-                } else<span class="cov4" title="5"> {
+                } else<span class="cov6" title="9"> {
                         service.ID = utils.GenerateID(0)
                         service.UpdatedAt = time.Now()
                         service.CreatedAt = time.Now()
                         database.Local.Services = append(database.Local.Services, service)
                 }</span>
         }
-        <span class="cov8" title="19">newService := GetServiceByEndpoint(service.Endpoint)
+        <span class="cov8" title="23">newService := GetServiceByEndpoint(service.Endpoint)
         utils.SugarLogger.Infof("registered service (%d) %s at %s", newService.ID, newService.Name, newService.Endpoint)
         return newService, nil</span>
 }
