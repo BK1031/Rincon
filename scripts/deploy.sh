@@ -28,10 +28,10 @@ then
 fi
 
 # Create a release tag
-git tag v$version -m "Release version $version"
-git push origin v$version
+git tag -s v$1 -m "Release version $1"
+git push origin v$1
 
 # Create a release
-gh release create v$version --generate-notes
+gh release create v$1 --generate-notes
 
-echo "Package released successfully for version $version"
+echo "Package released successfully for version $1"
