@@ -32,13 +32,18 @@ Alternatively if you have an existing compose file, you can add Rincon as a serv
 This way you can also connect Rincon to your existing database.
 
 ```yml
-
+rincon:
+    image: bk1031/rincon:latest
+    restart: unless-stopped
+    environment:
+      PORT: "10311"
+      STORAGE_MODE: "sql"
+      DB_DRIVER: "postgres"
+      DB_HOST: "localhost"
+      DB_PORT: "5432"
+      DB_NAME: "rincon"
+      DB_USER: "postgres"
+      DB_PASSWORD: "password"
+    ports:
+      - "10311:10311"
 ```
-
-## Configuration
-
-## API Endpoints
-
-
-
-## Roadmap
