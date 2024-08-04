@@ -396,7 +396,7 @@ type LocalStore struct {
         Routes              []model.Route
 }
 
-func InitializeLocal() <span class="cov10" title="6">{
+func InitializeLocal() <span class="cov10" title="5">{
         Local = &amp;LocalStore{
                 Services:            make([]model.Service, 0),
                 ServiceDependencies: make([]model.ServiceDependency, 0),
@@ -421,25 +421,25 @@ import (
 
 func InitializeSQL() <span class="cov10" title="8">{
         db, err := SelectDB()
-        if err != nil </span><span class="cov9" title="7">{
+        if err != nil </span><span class="cov8" title="6">{
                 if dbRetries &lt; 5 </span><span class="cov7" title="5">{
                         dbRetries++
                         utils.SugarLogger.Errorln("Failed to connect database, retrying in 5s... ")
                         time.Sleep(time.Second * 5)
                         InitializeSQL()
-                }</span> else<span class="cov4" title="2"> {
+                }</span> else<span class="cov1" title="1"> {
                         utils.SugarLogger.Errorln("Failed to connect database after 5 attempts, defaulting to local storage")
                         config.StorageMode = "local"
                         InitializeLocal()
                         return
                 }</span>
-        } else<span class="cov1" title="1"> {
+        } else<span class="cov4" title="2"> {
                 utils.SugarLogger.Infoln("Connected to database")
                 err = db.AutoMigrate(&amp;model.Service{}, &amp;model.ServiceDependency{}, &amp;model.Route{})
                 if err != nil </span><span class="cov0" title="0">{
                         utils.SugarLogger.Errorln("AutoMigration failed", err)
                 }</span>
-                <span class="cov1" title="1">utils.SugarLogger.Infoln("AutoMigration complete")
+                <span class="cov4" title="2">utils.SugarLogger.Infoln("AutoMigration complete")
                 DB = db</span>
         }
 }
@@ -512,7 +512,7 @@ type Route struct {
         CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (Route) TableName() string <span class="cov1" title="1">{
+func (Route) TableName() string <span class="cov2" title="2">{
         return config.DatabaseTablePrefix + "route"
 }</span>
 
@@ -556,7 +556,7 @@ type Service struct {
         CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (Service) TableName() string <span class="cov8" title="1">{
+func (Service) TableName() string <span class="cov10" title="2">{
         return config.DatabaseTablePrefix + "service"
 }</span>
 
@@ -567,7 +567,7 @@ type ServiceDependency struct {
         CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime;precision:6"`
 }
 
-func (ServiceDependency) TableName() string <span class="cov8" title="1">{
+func (ServiceDependency) TableName() string <span class="cov10" title="2">{
         return config.DatabaseTablePrefix + "service_dependency"
 }</span>
 </pre>
@@ -1024,9 +1024,9 @@ import (
 
 func GetAllServices() []model.Service <span class="cov5" title="6">{
         services := make([]model.Service, 0)
-        if config.StorageMode == "sql" </span><span class="cov2" title="2">{
+        if config.StorageMode == "sql" </span><span class="cov4" title="4">{
                 database.DB.Find(&amp;services)
-        }</span> else<span class="cov4" title="4"> {
+        }</span> else<span class="cov2" title="2"> {
                 services = database.Local.Services
         }</span>
         <span class="cov5" title="6">return services</span>
@@ -1087,11 +1087,11 @@ func GetServicesByName(name string) []model.Service <span class="cov2" title="2"
 
 func GetServiceByEndpoint(endpoint string) model.Service <span class="cov10" title="38">{
         var service model.Service
-        if config.StorageMode == "sql" </span><span class="cov7" title="12">{
+        if config.StorageMode == "sql" </span><span class="cov8" title="24">{
                 database.DB.Where("endpoint = ?", endpoint).First(&amp;service)
-        }</span> else<span class="cov9" title="26"> {
-                for _, s := range database.Local.Services </span><span class="cov9" title="29">{
-                        if s.Endpoint == endpoint </span><span class="cov8" title="17">{
+        }</span> else<span class="cov7" title="14"> {
+                for _, s := range database.Local.Services </span><span class="cov6" title="11">{
+                        if s.Endpoint == endpoint </span><span class="cov6" title="9">{
                                 service = s
                                 break</span>
                         }
@@ -1112,26 +1112,26 @@ func CreateService(service model.Service) (model.Service, error) <span class="co
         }</span>
         <span class="cov8" title="19">service.Name = utils.NormalizeName(service.Name)
         existing := GetServiceByEndpoint(service.Endpoint)
-        if config.StorageMode == "sql" </span><span class="cov5" title="6">{
-                if existing.Endpoint != "" </span><span class="cov2" title="2">{
+        if config.StorageMode == "sql" </span><span class="cov7" title="12">{
+                if existing.Endpoint != "" </span><span class="cov4" title="4">{
                         service.ID = existing.ID
                         database.DB.Model(&amp;service).Where("endpoint = ?", service.Endpoint).Updates(service)
-                }</span> else<span class="cov4" title="4"> {
+                }</span> else<span class="cov6" title="8"> {
                         service.ID = utils.GenerateID(0)
                         database.DB.Create(&amp;service)
                 }</span>
-        } else<span class="cov7" title="13"> {
-                if existing.Endpoint != "" </span><span class="cov4" title="4">{
+        } else<span class="cov5" title="7"> {
+                if existing.Endpoint != "" </span><span class="cov2" title="2">{
                         service.ID = existing.ID
                         service.CreatedAt = existing.CreatedAt
                         service.UpdatedAt = time.Now()
-                        for i, s := range database.Local.Services </span><span class="cov4" title="5">{
-                                if s.ID == existing.ID </span><span class="cov4" title="4">{
+                        for i, s := range database.Local.Services </span><span class="cov2" title="2">{
+                                if s.ID == existing.ID </span><span class="cov2" title="2">{
                                         database.Local.Services[i] = service
                                         break</span>
                                 }
                         }
-                } else<span class="cov6" title="9"> {
+                } else<span class="cov4" title="5"> {
                         service.ID = utils.GenerateID(0)
                         service.UpdatedAt = time.Now()
                         service.CreatedAt = time.Now()
@@ -1144,12 +1144,12 @@ func CreateService(service model.Service) (model.Service, error) <span class="co
 }
 
 func RemoveService(id int) <span class="cov4" title="5">{
-        if config.StorageMode == "sql" </span><span class="cov1" title="1">{
+        if config.StorageMode == "sql" </span><span class="cov4" title="4">{
                 database.DB.Delete(&amp;model.Service{}, id)
                 return
-        }</span> else<span class="cov4" title="4"> {
-                for i, s := range database.Local.Services </span><span class="cov5" title="6">{
-                        if s.ID == id </span><span class="cov4" title="4">{
+        }</span> else<span class="cov1" title="1"> {
+                for i, s := range database.Local.Services </span><span class="cov1" title="1">{
+                        if s.ID == id </span><span class="cov1" title="1">{
                                 database.Local.Services = append(database.Local.Services[:i], database.Local.Services[i+1:]...)
                                 break</span>
                         }

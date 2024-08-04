@@ -440,37 +440,439 @@ func TestGetOverlappingRoutes(t *testing.T) {
 	})
 }
 
-// func TestGetRoutesLocal(t *testing.T) {
-// 	ResetLocalDB()
-// 	t.Run("Test Get All Routes", func(t *testing.T) {
-// 		routes := GetAllRoutes()
-// 		if len(routes) != 0 {
-// 			t.Errorf("Expected length to be 0")
-// 		}
-// 	})
-// 	t.Run("Test Get Num Routes", func(t *testing.T) {
-// 		CreateRoute(model.Route{
-// 			Route:       "/test",
-// 			ServiceName: "Service 1",
-// 		})
-// 		num := GetNumRoutes()
-// 		if num == 0 {
-// 			t.Errorf("No routes found")
-// 		}
-// 	})
-// 	t.Run("Test Get Route By Route", func(t *testing.T) {
-// 		route := GetRoutesByRoute("/test")
-// 		if len(route) == 0 {
-// 			t.Errorf("No route found")
-// 		}
-// 	})
-// 	t.Run("Test Get Routes By Service Name", func(t *testing.T) {
-// 		routes := GetRoutesByServiceName("Service 1")
-// 		if len(routes) == 0 {
-// 			t.Errorf("No routes found")
-// 		}
-// 	})
-// }
+func TestGetAllRoutesSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		routes := GetAllRoutes()
+		if len(routes) != 0 {
+			t.Errorf("Expected length to be 0")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		routes := GetAllRoutes()
+		if len(routes) != 1 {
+			t.Errorf("Expected length to be 1")
+		}
+	})
+	t.Run("Test Two Routes", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test2",
+			ServiceName: "Service 2",
+			Method:      "GET",
+		})
+		routes := GetAllRoutes()
+		if len(routes) != 2 {
+			t.Errorf("Expected length to be 2")
+		}
+	})
+}
+
+func TestGetNumRoutesSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		num := GetNumRoutes()
+		if num != 0 {
+			t.Errorf("Expected length to be 0")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		num := GetNumRoutes()
+		if num != 1 {
+			t.Errorf("Expected length to be 1")
+		}
+	})
+}
+
+func TestGetRoutesByRouteSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		routes := GetRoutesByRoute("/test")
+		if len(routes) != 0 {
+			t.Errorf("Expected length to be 0")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		routes := GetRoutesByRoute("/test")
+		if len(routes) != 1 {
+			t.Errorf("Expected length to be 1")
+		}
+	})
+	t.Run("Test Two Routes", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test2",
+			ServiceName: "Service 2",
+			Method:      "GET",
+		})
+		CreateRoute(model.Route{
+			Route:       "/test2",
+			ServiceName: "Service 1",
+			Method:      "POST",
+		})
+		routes := GetRoutesByRoute("/test2")
+		if len(routes) != 2 {
+			t.Errorf("Expected length to be 2")
+		}
+	})
+}
+
+func TestGetRoutesByServiceNameSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		routes := GetRoutesByServiceName("Service 1")
+		if len(routes) != 0 {
+			t.Errorf("Expected length to be 0")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		CreateRoute(model.Route{
+			Route:       "/test/example",
+			ServiceName: "Service 2",
+			Method:      "GET",
+		})
+		routes := GetRoutesByServiceName("Service 1")
+		if len(routes) != 1 {
+			t.Errorf("Expected length to be 1")
+		}
+	})
+	t.Run("Test Two Routes", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/another/route",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		routes := GetRoutesByServiceName("Service 1")
+		if len(routes) != 2 {
+			t.Errorf("Expected length to be 2")
+		}
+	})
+}
+
+func TestGetRouteByRouteAndMethodSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		route := GetRouteByRouteAndMethod("/test", "GET")
+		if route.ID != "" {
+			t.Errorf("Expected route id to be empty")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		route := GetRouteByRouteAndMethod("/test", "GET")
+		if route.ID != "/test-[GET]" {
+			t.Errorf("Expected route id to be set")
+		}
+	})
+	t.Run("Test Two Routes", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "POST",
+		})
+		route := GetRouteByRouteAndMethod("/test", "GET")
+		if route.ID != "/test-[GET]" {
+			t.Errorf("Expected route id to be set")
+		}
+	})
+	t.Run("Test Wildcard Method", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/amazing",
+			ServiceName: "Service 3",
+			Method:      "*",
+		})
+		route := GetRouteByRouteAndMethod("/amazing", "GET")
+		if route.ID != "/amazing-[*]" {
+			t.Errorf("Expected route id to be set")
+		}
+	})
+}
+
+func TestGetRouteByRouteAndServiceSQL(t *testing.T) {
+	ResetSQLDB()
+	t.Run("Test No Routes", func(t *testing.T) {
+		route := GetRouteByRouteAndService("/test", "Service 1")
+		if route.ID != "" {
+			t.Errorf("Expected route id to be empty")
+		}
+	})
+	t.Run("Test One Route", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		route := GetRouteByRouteAndService("/test", "Service 1")
+		if route.ID != "/test-[GET]" {
+			t.Errorf("Expected route id to be set")
+		}
+	})
+	t.Run("Test Two Routes", func(t *testing.T) {
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "POST",
+		})
+		route := GetRouteByRouteAndService("/test", "Service 2")
+		if route.ID != "/test-[POST]" {
+			t.Errorf("Expected route id to be set")
+		}
+	})
+}
+
+func TestCreateRouteSQL(t *testing.T) {
+	ResetSQLDB()
+	config.OverwriteRoutes = "false"
+	t.Run("Test No Route", func(t *testing.T) {
+		route := model.Route{
+			ServiceName: "Service 1",
+		}
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("No error when creating route: %v", err)
+		}
+	})
+	t.Run("Test No Service Name", func(t *testing.T) {
+		route := model.Route{
+			Route: "/test",
+		}
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("No error when creating route: %v", err)
+		}
+	})
+	t.Run("Test No Method Name", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+		}
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("No error when creating route: %v", err)
+		}
+	})
+	t.Run("Test Route Ends With Slash", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test/",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		}
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("No error when creating route: %v", err)
+		}
+	})
+	t.Run("Test Create Route", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		}
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+	})
+	t.Run("Test Route Exists Upgrade Method", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET,POST",
+		}
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+		route = GetRouteByRouteAndService("/test", "Service 1")
+		if route.Method != "GET,POST" {
+			t.Errorf("Route method not updated, found %s", route.Method)
+		}
+	})
+	t.Run("Test Route Exists No Overlap", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "DELETE",
+		}
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+	})
+	t.Run("Test Route Exists Overlap Deny Overwrite", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "GET,DELETE",
+		}
+		config.OverwriteRoutes = "false"
+		err := CreateRoute(route)
+		if err == nil {
+			t.Errorf("Expected error when creating route")
+		}
+	})
+	t.Run("Test Route Exists Overlap Allow Overwrite", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "GET,DELETE",
+		}
+		config.OverwriteRoutes = "true"
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+		route = GetRouteByRouteAndService("/test", "Service 2")
+		if route.Method != "GET,DELETE" {
+			t.Errorf("Service 2 route method not updated, found %s", route.Method)
+		}
+		route = GetRouteByRouteAndService("/test", "Service 1")
+		if route.ID != "" {
+			t.Errorf("Found old route for Service 1")
+		}
+	})
+}
+
+func TestGetOverlappingRoutesSQL(t *testing.T) {
+	t.Run("Test No Overlap Same Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "POST",
+		})
+		if len(overlap) != 0 {
+			t.Errorf("Expected no overlap")
+		}
+	})
+	t.Run("Test No Overlap Different Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "POST",
+		})
+		if len(overlap) != 0 {
+			t.Errorf("Expected no overlap")
+		}
+	})
+	t.Run("Test Overlap Same Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET,POST",
+		})
+		if len(overlap) != 1 {
+			t.Errorf("Expected overlap to be 1")
+		}
+		if overlap[0].ID != "/test-[GET]" {
+			t.Errorf("Expected overlap to be /test-[GET]")
+		}
+	})
+	t.Run("Test Overlap Different Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "GET,POST",
+		})
+		if len(overlap) != 1 {
+			t.Errorf("Expected overlap to be 1")
+		}
+		if overlap[0].ID != "/test-[GET]" {
+			t.Errorf("Expected overlap to be /test-[GET]")
+		}
+	})
+	t.Run("Test Wildcard Existing Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "*",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "GET,POST",
+		})
+		if len(overlap) != 1 {
+			t.Errorf("Expected overlap to be 1")
+		}
+		if overlap[0].ID != "/test-[*]" {
+			t.Errorf("Expected overlap to be /test-[*]")
+		}
+	})
+	t.Run("Test Wildcard New Service", func(t *testing.T) {
+		ResetSQLDB()
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "GET",
+		})
+		CreateRoute(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "PUT",
+		})
+		overlap := GetOverlappingRoutes(model.Route{
+			Route:       "/test",
+			ServiceName: "Service 2",
+			Method:      "*",
+		})
+		if len(overlap) != 2 {
+			t.Errorf("Expected overlap to be 2")
+		}
+		if overlap[0].ID != "/test-[GET]" {
+			t.Errorf("Expected overlap 1 to be /test-[GET]")
+		}
+		if overlap[1].ID != "/test-[PUT]" {
+			t.Errorf("Expected overlap 2 to be /test-[PUT]")
+		}
+	})
+}
 
 // func TestCreateRouteSQL(t *testing.T) {
 // 	ResetSQLDB()
