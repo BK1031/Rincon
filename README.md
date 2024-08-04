@@ -29,16 +29,72 @@ $ docker run -d -p 10311:10311 bk1031/rincon:latest
 ```
 
 Alternatively if you have an existing compose file, you can add Rincon as a service.
-This way you can also connect Rincon to your existing database.
+This way you can easily connect Rincon to your existing database.
 
 ```yml
+rincon:
+    image: bk1031/rincon:latest
+    restart: unless-stopped
+    environment:
+      PORT: "10311"
+      STORAGE_MODE: "sql"
+      DB_DRIVER: "postgres"
+      DB_HOST: "localhost"
+      DB_PORT: "5432"
+      DB_NAME: "rincon"
+      DB_USER: "postgres"
+      DB_PASSWORD: "password"
+    ports:
+      - "10311:10311"
+```
+
+By default Rincon will run on port `10311`. Once Rincon is running, we can connect to it from our application using the default username and password `admin`. Let's register a service called `Service A`.
 
 ```
+curl -X "POST" "http://localhost:10311/rincon/services" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -u 'admin:admin' \
+     -d $'{
+  "endpoint": "localhost:8080",
+  "name": "Service A",
+  "health_check": "localhost:8080/health",
+  "version": "1.0.0"
+}'
+```
+
+The response body will contain an ID for our newly registered service. Including this ID in future requests will allow you to update the service's registration. Now we can register a route that `Service A` will handle.
+
+```
+curl -X "POST" "http://localhost:10311/rincon/routes" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -u 'admin:admin' \
+     -d $'{
+  "route": "/service",
+  "service_name": "Service A",
+  "method": "*"
+}'
+```
+
+Now we can verify that our service and route are properly registered by making a request to the route matching endpoint.
+
+```
+curl "http://localhost:10311/rincon/match?route=service&method=GET"
+```
+
+You should see the service registration for `Service A` returned in the response body. We have now successfully registered a service and route!
+
+> [!TIP]
+> If you're using Go, check out our client sdk [here](https://github.com/bk1031/rincon-go).
+
+## Services
+
+## Health Checking
+
+## Routing
 
 ## Configuration
 
 ## API Endpoints
-
 
 
 ## Roadmap
