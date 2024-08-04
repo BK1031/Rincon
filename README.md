@@ -96,5 +96,4 @@ You should see the service registration for `Service A` returned in the response
 
 ## API Endpoints
 
-
 ## Roadmap
