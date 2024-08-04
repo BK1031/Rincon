@@ -31,19 +31,21 @@ func GetNumRoutes() int {
 	}
 }
 
-func GetRouteByID(id string) model.Route {
-	var route model.Route
+func GetRoutesByRoute(route string) []model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
+	routes := make([]model.Route, 0)
 	if config.StorageMode == "sql" {
-		database.DB.Where("route = ?", id).First(&route)
+		database.DB.Where("route = ?", route).Find(&routes)
 	} else {
 		for _, r := range database.Local.Routes {
-			if r.Route == id {
-				route = r
-				break
+			if r.Route == route {
+				routes = append(routes, r)
 			}
 		}
 	}
-	return route
+	return routes
 }
 
 func GetRoutesByServiceName(name string) []model.Route {
@@ -61,45 +63,115 @@ func GetRoutesByServiceName(name string) []model.Route {
 	return routes
 }
 
+func GetRouteByRouteAndMethod(route string, method string) model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
+	routes := GetRoutesByRoute(route)
+	for _, r := range routes {
+		if strings.Contains(r.Method, method) || strings.Contains(r.Method, "*") {
+			return r
+		}
+	}
+	return model.Route{}
+}
+
+func GetRouteByRouteAndService(route string, service string) model.Route {
+	route = strings.TrimPrefix(route, "/")
+	route = strings.TrimSuffix(route, "/")
+	route = "/" + route
+	service = utils.NormalizeName(service)
+	routes := GetRoutesByRoute(route)
+	for _, r := range routes {
+		if r.ServiceName == service {
+			return r
+		}
+	}
+	return model.Route{}
+}
+
 func CreateRoute(route model.Route) error {
 	if route.Route == "" {
 		return fmt.Errorf("route cannot be empty")
 	} else if route.ServiceName == "" {
 		return fmt.Errorf("service name cannot be empty")
+	} else if !strings.HasPrefix(route.Route, "/") {
+		return fmt.Errorf("route must start with a slash")
 	} else if strings.HasSuffix(route.Route, "/") {
 		return fmt.Errorf("route cannot end with a slash")
+	} else if !route.IsMethodValid() {
+		return fmt.Errorf("invalid method %s", route.Method)
 	}
+	route.Method = strings.ToUpper(route.Method)
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
+	route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
 	route.CreatedAt = time.Now()
 
-	if GetRouteByID(route.Route).Route != "" {
-		if route.ServiceName != GetRouteByID(route.Route).ServiceName {
-			if config.OverwriteRoutes == "true" {
-				DeleteRoute(route.Route)
-			} else {
-				utils.SugarLogger.Errorf("route with id %s already exists", route.Route)
-				return fmt.Errorf("route with id %s already exists", route.Route)
+	overlapRoutes := GetOverlappingRoutes(route)
+	if len(overlapRoutes) == 1 && overlapRoutes[0].ServiceName == route.ServiceName {
+		utils.SugarLogger.Debugf("replacing existing route %s for service %s", route.Route, route.ServiceName)
+		DeleteRoute(overlapRoutes[0].ID)
+	} else if len(overlapRoutes) > 0 {
+		if config.OverwriteRoutes == "true" {
+			for _, r := range overlapRoutes {
+				DeleteRoute(r.ID)
 			}
 		} else {
-			utils.SugarLogger.Debugf("route with id %s for service %s already exists", route.Route, route.ServiceName)
-			return nil
+			return fmt.Errorf("route with id %s overlaps with existing routes [%s]", route.ID, PrintRouteArray(overlapRoutes))
 		}
 	}
+
 	if config.StorageMode == "sql" {
 		database.DB.Create(&route)
 	} else {
 		database.Local.Routes = append(database.Local.Routes, route)
 	}
-	utils.SugarLogger.Infof("route with id %s registered for service %s", route.Route, route.ServiceName)
+	utils.SugarLogger.Infof("route with id %s registered for service %s", route.ID, route.ServiceName)
 	return nil
+}
+
+func PrintRouteArray(routes []model.Route) string {
+	s := ""
+	for i, r := range routes {
+		s += fmt.Sprintf("[%s] %s (%s)", r.Method, r.Route, r.ServiceName)
+		if i != len(routes)-1 {
+			s += ", "
+		}
+	}
+	return s
+}
+
+func GetOverlappingRoutes(route model.Route) []model.Route {
+	route.Method = strings.ToUpper(route.Method)
+	route.ServiceName = utils.NormalizeName(route.ServiceName)
+	overlapRoutes := make([]model.Route, 0)
+	existingRoutes := GetRoutesByRoute(route.Route)
+	takenMethods := make(map[string]string)
+	for _, r := range existingRoutes {
+		for _, m := range strings.Split(r.Method, ",") {
+			takenMethods[m] = r.ServiceName
+			if m == "*" {
+				return existingRoutes
+			}
+		}
+	}
+	for _, m := range strings.Split(route.Method, ",") {
+		if m == "*" {
+			return existingRoutes
+		}
+		if takenMethods[m] != "" {
+			overlapRoutes = append(overlapRoutes, GetRouteByRouteAndService(route.Route, takenMethods[m]))
+		}
+	}
+	return overlapRoutes
 }
 
 func DeleteRoute(id string) {
 	if config.StorageMode == "sql" {
-		database.DB.Where("route = ?", id).Delete(&model.Route{})
+		database.DB.Where("id = ?", id).Delete(&model.Route{})
 	} else {
 		for i, r := range database.Local.Routes {
-			if r.Route == id {
+			if r.ID == id {
 				database.Local.Routes = append(database.Local.Routes[:i], database.Local.Routes[i+1:]...)
 				break
 			}
@@ -108,75 +180,78 @@ func DeleteRoute(id string) {
 	utils.SugarLogger.Infof("route with id %s deleted", id)
 }
 
-func MatchRoute(route string) model.Service {
+func MatchRoute(route string, method string) model.Service {
 	if utils.SugarLogger.Level().String() == "debug" {
 		PrintRouteGraph()
 	}
 	var service model.Service
 	graph := GetRouteGraph()
 	utils.SugarLogger.Debugf("Matching route  /" + route)
-	matchedRoute := TraverseGraph("", route, graph)
+	matchedRoute := TraverseGraph("", route, method, graph)
 	if matchedRoute == "" {
 		utils.SugarLogger.Errorf("No route found for /%s", route)
 		return service
 	}
 	utils.SugarLogger.Debugf("Matched to " + matchedRoute)
 	for _, r := range GetAllRoutes() {
-		if r.Route == matchedRoute {
+		if r.Route == matchedRoute && (strings.Contains(r.Method, method) || strings.Contains(r.Method, "*")) {
 			service.Name = r.ServiceName
 			break
 		}
 	}
-	if service.Name == "" {
-		utils.SugarLogger.Errorf("No service found for route /%s", route)
-		go DeleteRoute(matchedRoute)
-		return service
-	}
 	service = LoadBalance(service.Name, "random")
 	if service.ID == 0 {
-		utils.SugarLogger.Infoln("No eligible service instance found for" + service.Name)
+		utils.SugarLogger.Infoln("No eligible service instance found for route /" + route)
+		go DeleteRoute(matchedRoute)
 	} else {
 		utils.SugarLogger.Infof("Matched route /%s to %s for service %s (%d)", route, matchedRoute, service.Name, service.ID)
 	}
 	return service
 }
 
-func TraverseGraph(path string, route string, graph map[string][]model.RouteNode) string {
+func TraverseGraph(path string, route string, method string, graph map[string][]model.RouteNode) string {
 	currPathCount := strings.Count(path, "/")
 	routeSlugCount := strings.Count("/"+route, "/")
 	lastSlug := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 	pathWithoutLastSlug := strings.TrimSuffix(path, "/"+lastSlug)
 
-	utils.SugarLogger.Debugf("Traversing graph\nwith path %s\nand route /%s", path, route)
+	utils.SugarLogger.Debugf("Traversing graph with path \"%s\" and route \"/%s\"", path, route)
 
 	if pathWithoutLastSlug == "" {
 		pathWithoutLastSlug = "/"
 	}
-	if lastSlug != "" && HasChildPath(lastSlug, graph[pathWithoutLastSlug]) == "" {
-		utils.SugarLogger.Debugf("Child path %s does not exist", lastSlug)
+	cindex := HasChildPath(lastSlug, graph[pathWithoutLastSlug])
+	if lastSlug != "" && cindex == -1 {
+		utils.SugarLogger.Debugf("Child path \"%s\" does not exist", lastSlug)
 		return ""
 	}
-	if lastSlug == "**" {
+	if lastSlug == "**" && CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) {
 		utils.SugarLogger.Debugf("Found all path wildcard (**)")
 		return path
 	}
-	utils.SugarLogger.Debugf("Child path %s exists", lastSlug)
+	utils.SugarLogger.Debugf("Child path \"%s\" exists", lastSlug)
 
 	if currPathCount == routeSlugCount {
 		utils.SugarLogger.Debugf("Reached end of route")
-		return path
+		if CanRouteHandleMethod(graph[pathWithoutLastSlug][cindex], method) {
+			utils.SugarLogger.Debugf("Route can handle method %s", method)
+			return path
+		} else {
+			utils.SugarLogger.Debugf("Route cannot handle method %s", method)
+			return ""
+		}
 	}
 
 	nextSlug := strings.Split("/"+route, "/")[currPathCount+1]
-	slugBranch := TraverseGraph(path+"/"+nextSlug, route, graph)
+	slugBranch := TraverseGraph(path+"/"+nextSlug, route, method, graph)
 	if slugBranch != "" {
 		return slugBranch
 	}
-	anyBranch := TraverseGraph(path+"/*", route, graph)
+	anyBranch := TraverseGraph(path+"/*", route, method, graph)
 	if anyBranch != "" {
 		return anyBranch
 	}
-	allBranch := TraverseGraph(path+"/**", route, graph)
+	allBranch := TraverseGraph(path+"/**", route, method, graph)
 	if allBranch != "" {
 		return allBranch
 	}
@@ -184,13 +259,22 @@ func TraverseGraph(path string, route string, graph map[string][]model.RouteNode
 	return ""
 }
 
-func HasChildPath(path string, children []model.RouteNode) string {
-	for _, c := range children {
+func HasChildPath(path string, children []model.RouteNode) int {
+	for i, c := range children {
 		if c.Path == path {
-			return c.Path
+			return i
 		}
 	}
-	return ""
+	return -1
+}
+
+func CanRouteHandleMethod(route model.RouteNode, method string) bool {
+	for _, s := range route.Services {
+		if strings.Contains(s.Method, method) || strings.Contains(s.Method, "*") {
+			return true
+		}
+	}
+	return false
 }
 
 func GetRouteGraph() map[string][]model.RouteNode {
@@ -207,23 +291,34 @@ func GetRouteGraph() map[string][]model.RouteNode {
 				if _, exists := children[parent]; !exists {
 					children[parent] = make([]model.RouteNode, 0)
 				}
-				// delete existing node
-				for j, n := range children[parent] {
-					if n.Path == slugs[i] {
-						children[parent] = append(children[parent][:j], children[parent][j+1:]...)
-						break
+				endpoint := false
+				if i == len(slugs)-1 {
+					endpoint = true
+				}
+				if index := HasChildPath(slugs[i], children[parent]); index != -1 {
+					if endpoint {
+						children[parent][index].Services = append(children[parent][index].Services, model.RouteService{
+							ServiceName: r.ServiceName,
+							Method:      r.Method,
+						})
+					}
+				} else {
+					if endpoint {
+						children[parent] = append(children[parent], model.RouteNode{
+							ID:        parent + "/" + slugs[i],
+							Path:      slugs[i],
+							Services:  []model.RouteService{{ServiceName: r.ServiceName, Method: r.Method}},
+							CreatedAt: time.Now(),
+						})
+					} else {
+						children[parent] = append(children[parent], model.RouteNode{
+							ID:        parent + "/" + slugs[i],
+							Path:      slugs[i],
+							Services:  []model.RouteService{},
+							CreatedAt: time.Now(),
+						})
 					}
 				}
-				name := ""
-				if i == len(slugs)-1 {
-					name = r.ServiceName
-				}
-				children[parent] = append(children[parent], model.RouteNode{
-					ID:          parent + "/" + slugs[i],
-					Path:        slugs[i],
-					ServiceName: name,
-					CreatedAt:   time.Now(),
-				})
 				if parent == "/" {
 					parent += slugs[i]
 				} else {
@@ -241,8 +336,19 @@ func PrintRouteGraph() {
 	for k, v := range graph {
 		println(k)
 		for _, n := range v {
-			println("   -> " + n.Path + " (" + n.ServiceName + ")")
+			println("   -> " + n.Path + " (" + PrintRouteServices(n.Services) + ")")
 		}
 	}
 	println("===========================")
+}
+
+func PrintRouteServices(rs []model.RouteService) string {
+	s := ""
+	for i, r := range rs {
+		s += fmt.Sprintf("[%s] %s", r.Method, r.ServiceName)
+		if i != len(rs)-1 {
+			s += ", "
+		}
+	}
+	return s
 }

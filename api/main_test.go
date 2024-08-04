@@ -13,7 +13,7 @@ import (
 func TestMain(m *testing.M) {
 	utils.InitializeLogger()
 	utils.VerifyConfig()
-	database.InitializeLocal()
+	database.InitializeDB()
 	service.RegisterSelf()
 	exitVal := m.Run()
 	os.Exit(exitVal)

@@ -14,7 +14,6 @@ func main() {
 	defer utils.Logger.Sync()
 
 	utils.VerifyConfig()
-	database.InitializeLocal()
 	database.InitializeDB()
 	service.RegisterSelf()
 	service.InitializeHeartbeat()

@@ -1,12 +1,13 @@
 package service
 
 import (
-	"github.com/go-co-op/gocron/v2"
-	"github.com/go-resty/resty/v2"
 	"rincon/config"
 	"rincon/utils"
 	"strconv"
 	"time"
+
+	"github.com/go-co-op/gocron/v2"
+	"github.com/go-resty/resty/v2"
 )
 
 func InitializeHeartbeat() {
@@ -53,7 +54,7 @@ func ServerHeartbeat(interval int) {
 
 func ClientHeartbeat(interval int) {
 	for _, s := range GetAllServices() {
-		delta := time.Now().Sub(s.UpdatedAt).Milliseconds()
+		delta := time.Since(s.UpdatedAt).Milliseconds()
 		utils.SugarLogger.Infof("Last %s (%d) ping was %dms ago", s.Name, s.ID, delta)
 		if delta > int64((interval+1)*1000) && s.Name != "rincon" {
 			utils.SugarLogger.Errorf("Service %s (%d) registration expired!", s.Name, s.ID)

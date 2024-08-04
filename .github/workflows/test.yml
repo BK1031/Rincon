@@ -1,4 +1,4 @@
-name: Rincon Tests
+name: tests
 run-name: Triggered by ${{ github.event_name }} to ${{ github.ref }} by @${{ github.actor }}
 
 on: [push]
@@ -6,7 +6,7 @@ on: [push]
 jobs:
   rincon_test_job:
     runs-on: ubuntu-latest
-    name: Unit Tests
+    name: unit
     defaults:
       run:
         shell: bash
@@ -17,7 +17,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22.0'
+          go-version: "1.22.0"
       - name: Install dependencies
         run: |
           go get .
