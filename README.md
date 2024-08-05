@@ -125,7 +125,7 @@ Say we register a service `New York` with the following definition:
 ```
 
 Rincon will return the following service object to us:
-```
+```json
 {
   "id": 820522,
   "name": "new_york",
