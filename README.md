@@ -16,7 +16,7 @@ Rincon is also platform-agnostic, and can run in the cloud, a container, or even
 making it perfect for both local development and production environments.
 
 Rincon makes it easy for services to register themselves and to discover other services.
-Built-in support for health checking allows monitoring service status and prevents routing to unavailable services.
+Built-in support for health checking and load balancing allows monitoring service status and prevents routing to unavailable services.
 External services such as SaaS vendors can also be registered to create a unified discovery interface.
 
 ## Getting Started
@@ -88,9 +88,73 @@ You should see the service registration for `Service A` returned in the response
 
 ## Services
 
+Services are the core of Rincon. They represent instances of a specific application that you want to enable discovery of. Each service has the following properties:
+
+- `id`: The unique identifier for the service.
+- `name`: The name of the service.
+- `version`: The version of the service.
+- `endpoint`: The endpoint of the service.
+- `health_check`: The health check endpoint of the service.
+
+When you register a service, you must provide the name, version, endpoint, and health check endpoint. Upon registration, Rincon will return the following Service object.
+
+```json
+{
+  "id": 820522,
+  "name": "rincon",
+  "version": "2.0.0",
+  "endpoint": "http://localhost:10311",
+  "health_check": "http://localhost:10311/rincon/ping",
+  "updated_at": "2024-08-04T19:32:40.109239344-07:00",
+  "created_at": "2024-08-04T19:32:40.109239386-07:00"
+}
+```
+
+The `id` field is an auto-generated integer with the length specified by the `SERVICE_ID_LENGTH` configuration option. It is a unique identifier for a specific instance of a service. Instances are tied to a service by the `name` field. Note that the service name will be converted to lower-snakecase. The `endpoint` must also be unique across all service instances. When updating an existing service, the `endpoint` will be used as the primary identifier.
+
+### Example
+
+Say we register a service `New York` with the following definition:
+```json
+{
+  "name": "New York",
+  "version": "1.0.0",
+  "endpoint": "http://localhost:3000",
+  "health_check": "http://localhost:3000/ping",
+}
+```
+
+Rincon will return the following service object to us:
+```
+{
+  "id": 820522,
+  "name": "new_york",
+  "version": "1.0.0",
+  "endpoint": "http://localhost:3000",
+  "health_check": "http://localhost:3000/ping",
+  "updated_at": "2024-08-04T19:32:40.109239344-07:00",
+  "created_at": "2024-08-04T19:32:40.109239386-07:00"
+}
+```
+
+Any more services that we register using `New York` (will be converted to `new_york`) as the `name` will be considered another instance of the `New York` service.
+
 ## Health Checking
 
+Rincon supports health-checking to ensure that registered services are available through heartbeats. Any services determined to be unhealthy will be removed from the registry and no longer discoverable by other services.
+
+### Server Heartbeats
+
+This is the default heartbeat mode, where Rincon will ping each service's `health_check` endpoint at an interval defined by `HEARTBEAT_INTERVAL`.
+Any `2xx` status code will mark the heartbeat as successful. Any other response will mark the heartbeat as failed, resulting in the service being removed from the registry.
+
+### Client Heartbeats
+
+When operating in client heartbeat mode, Rincon expects pings from the registered services at least once every heartbeat interval. This ping should be made to the service registration endpoint, with all the service fields correctly populated. The ping can be cofirmed by ensuring the `updated_at` field in the response has increased. At each heartbeat interval, Rincon will remove all services with an updated_at timestamp older than the interval.
+
 ## Routing
+
+## Load Balancing
 
 ## Configuration
 
