@@ -190,6 +190,60 @@ Rincon currently supports the following HTTP Methods:
 - `HEAD`
 - `*` (wilcard, route can handle all methods)
 
+### Wildcard Routes
+
+Dynamic routing is supported through the use of wildcards, enabling services to handle variable path segments efficiently.
+
+#### `/*` - Any Wildcard
+
+This wildcard can be used to allow any string to match to a certain path segment.
+
+```
+/users/*
+---
+/users/123
+/users/abc
+```
+
+You can also use this wildcard in the middle of your route.
+
+```
+/users/*/profile
+---
+/users/123/profile
+/users/abc/profile
+```
+
+#### `/**` - All Wildcard
+
+This wildcard can be used to allow any string to match to all remaining path segments.
+
+```
+/users/**
+---
+/users/123
+/users/abc/edit
+/users/a1b2c3/account/settings
+```
+
+You can even use both wildcards for more specific routing.
+
+```
+/users/*/profile/**
+---
+/users/123/profile/edit
+/users/abc/profile/settings/notifications
+```
+
+> [!CAUTION]
+> While you can have the all wildcard (`**`) in the middle of a route path, when the route graph is computed all proceeding segments are ignored.
+> ```
+> /users/**/profile
+> ---
+> /users/123/profile/edit
+> /users/abc/profile/settings/notifications
+> ```
+
 ### Stacking Routes
 
 Routes with the same path and service name will automatically be "stacked". This just means that their methods will be combined into one registration in Rincon.
