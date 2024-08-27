@@ -321,7 +321,15 @@ San Francisco: /users [GET,POST,DELETE]
 
 ### Route Matching
 
+Internally, Rincon computes a route graph to help it match a requested route against its registered routes. This is a simple directed acyclic graph where nodes are route paths and edges are slugs needed to get to the next route path. Nodes also contain information about which services and methods can be handled at that route path.
 
+As an example, let's say we have the following route registrations.
+
+```
+New York: /users
+New York: /users/*
+San Francsico: /users/*/notifications
+```
 
 ### Example
 
