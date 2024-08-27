@@ -115,6 +115,9 @@ The `id` field is an auto-generated integer with the length specified by the `SE
 ### Example
 
 Say we register a service `New York` with the following definition:
+
+`[POST] http://localhost:10311/rincon/services`
+
 ```json
 {
   "name": "New York",
@@ -150,9 +153,96 @@ Any `2xx` status code will mark the heartbeat as successful. Any other response 
 
 ### Client Heartbeats
 
-When operating in client heartbeat mode, Rincon expects pings from the registered services at least once every heartbeat interval. This ping should be made to the service registration endpoint, with all the service fields correctly populated. The ping can be cofirmed by ensuring the `updated_at` field in the response has increased. At each heartbeat interval, Rincon will remove all services with an updated_at timestamp older than the interval.
+When operating in client heartbeat mode, Rincon expects pings from the registered services at least once every heartbeat interval. This ping should be made to the service registration endpoint, with all the service fields correctly populated. The ping can be cofirmed by ensuring the `updated_at` field in the response has increased. At each heartbeat interval, Rincon will remove all services with an `updated_at` timestamp older than the interval.
 
 ## Routing
+
+Services register routes to tell Rincon what requests they can handle. Each route has the following properties:
+
+- `id`: The unique identifier for the route.
+- `route`: The actual route path.
+- `method`: The http methods associated with the route.
+- `service_name`: The service associated with the route.
+
+When registering a route, you must provide the route, method, and service associated with that route. Upon registration, Rincon will return the following Route object.
+
+```json
+{
+  "id": "/rincon/ping-[*]",
+  "route": "/rincon/ping",
+  "method": "*",
+  "service_name": "rincon",
+  "created_at": "2024-08-04T01:05:37.262645179-07:00"
+}
+```
+
+The `id` is a generated field in the format `route-[method]`. Note that routes are tied to services, not any specific instance of a service. So if we register 10 routes to the `new_york` service and then spin up 2 more instances of the `new_york` service, all instances of the `new_york` service are considered able to handle those 10 routes.
+
+### Example
+
+Using our `New York` service from the previous example, let's register the following route.
+
+`[POST] http://localhost:10311/rincon/routes`
+
+```json
+{
+  "route": "/users",
+  "method": "*",
+  "service_name": "New York",
+  }
+```
+
+Rincon will return the following route object to us.
+
+```json
+{
+  "id": "/users-[*]",
+  "route": "/users",
+  "method": "*",
+  "service_name": "new_york",
+  "created_at": "2024-08-27T14:04:43.688527-07:00"
+}
+```
+
+Now we can confirm our route was correctly registered by making a request to the route matching endpoint.
+
+`[GET] http://localhost:10311/rincon/match?route=users&method=GET`
+
+```json
+{
+  "id": 416156,
+  "name": "new_york",
+  "version": "1.0.0",
+  "endpoint": "http://localhost:3000",
+  "health_check": "http://localhost:3000/health",
+  "updated_at": "2024-08-27T14:04:23.172214-07:00",
+  "created_at": "2024-08-27T14:04:23.172214-07:00"
+}
+```
+
+As expected, Rincon returned our `New York` service definition. Now let's try to register a route for a different service (assume that `San Francisco` is a service that has already been registered with Rincon).
+
+`[POST] http://localhost:10311/rincon/routes`
+
+```json
+{
+  "route": "/users",
+  "method": "*",
+  "service_name": "San Francisco",
+  }
+```
+
+Rincon will return the following route object to us.
+
+```json
+{
+  "id": "/users-[*]",
+  "route": "/users",
+  "method": "*",
+  "service_name": "new_york",
+  "created_at": "2024-08-27T14:04:43.688527-07:00"
+}
+```
 
 ## Load Balancing
 
