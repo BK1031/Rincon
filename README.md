@@ -194,7 +194,7 @@ Rincon currently supports the following HTTP Methods:
 
 Routes with the same path and service name will automatically be "stacked". This just means that their methods will be combined into one registration in Rincon.
 
-```
+```c
 New York: /users [GET]
 New York: /users [POST]
 ---
@@ -203,7 +203,7 @@ New York: /users [GET,POST]
 
 If the existing or new route method is `*`, then the stacked method will simply be the wildcard method.
 
-```
+```c
 New York: /users [*]
 New York: /users [POST]
 ---
@@ -214,30 +214,30 @@ New York: /users [*]
 
 By default, `OVERWRITE_ROUTES` is set to `false`. This means that if you attempt to register a route that has a conflict with an existing route, it will be rejected. Usually these conflicts arise from two routes attached to different services having an overlap in their methods.
 
-```cpp
+```c
 New York: /users [GET]
 San Francisco: /users [GET] // cannot be registered
 ```
 
 Even if the newer route has a higher method coverage than the existing route, the registration will be rejected as long as `OVERWRITE_ROUTES` is set to `false`.
 
-```
+```c
 New York: /users [GET]
-San Francisco: /users [GET,POST] # cannot be registered
+San Francisco: /users [GET,POST] // cannot be registered
 ```
 
 To ensure that your routes are registered successfully, make sure there are no method overlaps.
 
-```
+```c
 New York: /users [GET]
-San Francisco: /users [POST,PUT] # no conflict, will be registered successfully!
+San Francisco: /users [POST,PUT] // no conflict, will be registered successfully!
 ```
 
 ### Overwriting Routes
 
 When `OVERWRITE_ROUTES` is set to `true`, any conflicting registrations will not be rejected. Instead the new registration will replace the existing one.
 
-```
+```c
 New York: /users [GET]
 San Francisco: /users [GET]
 ---
@@ -246,7 +246,7 @@ San Francisco: /users [GET]
 
 If there are multiple conflicting routes, they will all be replaced.
 
-```
+```c
 New York: /users [GET]
 Boston: /users [POST]
 Los Angelos /users [DELETE]
@@ -261,7 +261,7 @@ San Francisco: /users [GET,POST,DELETE]
 > New York: /users [GET,POST]
 > San Francisco: /users [GET]
 > ---
-> San Francisco: /users [GET] # route for New York was completely removed!
+> San Francisco: /users [GET] // route for New York was completely removed!
 > ```
 
 ### Route Matching
