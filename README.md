@@ -255,13 +255,13 @@ San Francisco: /users [GET,POST,DELETE]
 San Francisco: /users [GET,POST,DELETE]
 ```
 
-> [!WARNING]
+> [!CAUTION]
 > Existing routes will be replaced even if they have a higher route coverage than the new route. Be careful when overwriting routes!
 > ```c
 > New York: /users [GET,POST]
 > San Francisco: /users [GET]
 > ---
-> San Francisco: /users [GET]
+> San Francisco: /users [GET] # route for New York was completely removed!
 > ```
 
 ### Route Matching
