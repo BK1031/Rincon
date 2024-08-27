@@ -235,13 +235,14 @@ You can even use both wildcards for more specific routing.
 /users/abc/profile/settings/notifications
 ```
 
-> [!CAUTION]
+> [!WARNING]
 > While you can have the all wildcard (`**`) in the middle of a route path, when the route graph is computed all proceeding segments are ignored.
 > ```
 > /users/**/profile
 > ---
-> /users/123/profile/edit
-> /users/abc/profile/settings/notifications
+> /users/123
+> /users/abc/profile
+> /users/a1b2c3/profile/edit
 > ```
 
 ### Stacking Routes
