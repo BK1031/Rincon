@@ -178,6 +178,96 @@ When registering a route, you must provide the route, method, and service associ
 
 The `id` is a generated field in the format `route-[method]`. Note that routes are tied to services, not any specific instance of a service. So if we register 10 routes to the `new_york` service and then spin up 2 more instances of the `new_york` service, all instances of the `new_york` service are considered able to handle those 10 routes.
 
+### Supported Methods
+
+Rincon currently supports the following HTTP Methods:
+- `GET`
+- `POST`
+- `PUT`
+- `DELETE`
+- `PATCH`
+- `OPTIONS`
+- `HEAD`
+- `*` (wilcard, route can handle all methods)
+
+### Stacking Routes
+
+Routes with the same path and service name will automatically be "stacked". This just means that their methods will be combined into one registration in Rincon.
+
+```c
+New York: /users [GET]
+New York: /users [POST]
+---
+New York: /users [GET,POST]
+```
+
+If the existing or new route method is `*`, then the stacked method will simply be the wildcard method.
+
+```c
+New York: /users [*]
+New York: /users [POST]
+---
+New York: /users [*]
+```
+
+### Conflicting Route Registrations
+
+By default, `OVERWRITE_ROUTES` is set to `false`. This means that if you attempt to register a route that has a conflict with an existing route, it will be rejected. Usually these conflicts arise from two routes attached to different services having an overlap in their methods.
+
+```c
+New York: /users [GET]
+San Francisco: /users [GET] # cannot be registered
+```
+
+Even if the newer route has a higher method coverage than the existing route, the registration will be rejected as long as `OVERWRITE_ROUTES` is set to `false`.
+
+```c
+New York: /users [GET]
+San Francisco: /users [GET,POST] # cannot be registered
+```
+
+To ensure that your routes are registered successfully, make sure there are no method overlaps.
+
+```c
+New York: /users [GET]
+San Francisco: /users [POST,PUT] # no conflict, will be registered successfully!
+```
+
+### Overwriting Routes
+
+When `OVERWRITE_ROUTES` is set to `true`, any conflicting registrations will not be rejected. Instead the new registration will replace the existing one.
+
+```c
+New York: /users [GET]
+San Francisco: /users [GET]
+---
+San Francisco: /users [GET]
+```
+
+If there are multiple conflicting routes, they will all be replaced.
+
+```c
+New York: /users [GET]
+Boston: /users [POST]
+Los Angelos /users [DELETE]
+San Francisco: /users [GET,POST,DELETE]
+---
+San Francisco: /users [GET,POST,DELETE]
+```
+
+> [!WARNING]
+> Existing routes will be replaced even if they have a higher route coverage than the new route. Be careful when overwriting routes!
+> ```c
+> New York: /users [GET,POST]
+> San Francisco: /users [GET]
+> ---
+> San Francisco: /users [GET]
+> ```
+
+### Route Matching
+
+
+
 ### Example
 
 Using our `New York` service from the previous example, let's register the following route.
@@ -227,22 +317,20 @@ As expected, Rincon returned our `New York` service definition. Now let's try to
 ```json
 {
   "route": "/users",
-  "method": "*",
+  "method": "POST",
   "service_name": "San Francisco",
-  }
+}
 ```
 
-Rincon will return the following route object to us.
+This time, we get the following error from Rincon.
 
 ```json
 {
-  "id": "/users-[*]",
-  "route": "/users",
-  "method": "*",
-  "service_name": "new_york",
-  "created_at": "2024-08-27T14:04:43.688527-07:00"
+  "message": "route with id /users-[POST] overlaps with existing routes [[*] /users (new_york)]"
 }
 ```
+
+This is because `New York` was already registered to handle all methods (based on the `*` wildcard method definition) on the `/users` route. By default a new service cannot register a route with a conflicting method. This can be changed by setting `OVERWRITE_ROUTES`.
 
 ## Load Balancing
 
