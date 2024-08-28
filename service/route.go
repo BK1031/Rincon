@@ -108,7 +108,6 @@ func CreateRoute(route model.Route) error {
 	route.CreatedAt = time.Now()
 
 	overlapRoutes := GetOverlappingRoutes(route)
-	fmt.Printf("overlapRoutes: %+v\n", overlapRoutes)
 	if len(overlapRoutes) == 1 && overlapRoutes[0].ServiceName == route.ServiceName {
 		utils.SugarLogger.Debugf("stacking existing route %s for service %s", route.Route, route.ServiceName)
 		route.Method = StackMethods(route.Method, overlapRoutes[0].Method)
@@ -164,7 +163,6 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	overlapRoutes := make([]model.Route, 0)
 	existingRoutes := GetRoutesByRoute(route.Route)
-	fmt.Printf("existingRoutes: %+v\n", existingRoutes)
 
 	for _, r := range existingRoutes {
 		for _, m := range strings.Split(r.Method, ",") {
@@ -174,7 +172,6 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 			}
 		}
 	}
-	fmt.Printf("methodMap: %+v\n", methodMap)
 	for _, m := range strings.Split(route.Method, ",") {
 		if m == "*" {
 			return existingRoutes
