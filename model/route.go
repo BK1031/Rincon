@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var validMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "*"}
+var ValidMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "*"}
 
 type Route struct {
 	ID          string    `json:"id" gorm:"primaryKey"`
@@ -24,7 +24,7 @@ func (Route) TableName() string {
 func (r *Route) IsMethodValid() bool {
 	methods := strings.Split(r.Method, ",")
 	for _, method := range methods {
-		if !slices.Contains(validMethods, method) {
+		if !slices.Contains(ValidMethods, method) {
 			return false
 		}
 	}
