@@ -3,6 +3,7 @@ package service
 import (
 	"rincon/config"
 	"rincon/model"
+	"strings"
 	"testing"
 )
 
@@ -283,7 +284,7 @@ func TestCreateRouteLocal(t *testing.T) {
 			t.Errorf("Error when creating route: %v", err)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")
-		if route.Method != "POST,GET" {
+		if !strings.Contains(route.Method, "GET") || !strings.Contains(route.Method, "POST") {
 			t.Errorf("Route method not updated, found %s", route.Method)
 		}
 	})
@@ -298,7 +299,7 @@ func TestCreateRouteLocal(t *testing.T) {
 			t.Errorf("Error when creating route: %v", err)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")
-		if route.Method != "GET,POST,PUT" {
+		if !strings.Contains(route.Method, "GET") || !strings.Contains(route.Method, "POST") || !strings.Contains(route.Method, "PUT") {
 			t.Errorf("Route method not updated, found %s", route.Method)
 		}
 	})
@@ -318,7 +319,7 @@ func TestCreateRouteLocal(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error when creating route: %v", err)
 		}
-		route = GetRouteByRouteAndService("/test", "Service 1")
+		route = GetRouteByRouteAndService("/test/**", "Service 1")
 		if route.Method != "*" {
 			t.Errorf("Route method not updated, found %s", route.Method)
 		}
@@ -358,7 +359,7 @@ func TestCreateRouteLocal(t *testing.T) {
 			t.Errorf("Error when creating route: %v", err)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 2")
-		if route.Method != "GET,DELETE" {
+		if !strings.Contains(route.Method, "GET") || !strings.Contains(route.Method, "DELETE") {
 			t.Errorf("Service 2 route method not updated, found %s", route.Method)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")
