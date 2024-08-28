@@ -276,7 +276,7 @@ func TestCreateRouteLocal(t *testing.T) {
 		route := model.Route{
 			Route:       "/test",
 			ServiceName: "Service 1",
-			Method:      "GET,POST",
+			Method:      "POST",
 		}
 		err := CreateRoute(route)
 		if err != nil {
@@ -284,6 +284,42 @@ func TestCreateRouteLocal(t *testing.T) {
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")
 		if route.Method != "GET,POST" {
+			t.Errorf("Route method not updated, found %s", route.Method)
+		}
+	})
+	t.Run("Test Route Exists Upgrade Method Overlap", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test",
+			ServiceName: "Service 1",
+			Method:      "POST,PUT",
+		}
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+		route = GetRouteByRouteAndService("/test", "Service 1")
+		if route.Method != "GET,POST,PUT" {
+			t.Errorf("Route method not updated, found %s", route.Method)
+		}
+	})
+	t.Run("Test Route Exists Upgrade Wildcard Method", func(t *testing.T) {
+		route := model.Route{
+			Route:       "/test/**",
+			ServiceName: "Service 1",
+			Method:      "GET,POST",
+		}
+		CreateRoute(route)
+		route = model.Route{
+			Route:       "/test/**",
+			ServiceName: "Service 1",
+			Method:      "*",
+		}
+		err := CreateRoute(route)
+		if err != nil {
+			t.Errorf("Error when creating route: %v", err)
+		}
+		route = GetRouteByRouteAndService("/test", "Service 1")
+		if route.Method != "*" {
 			t.Errorf("Route method not updated, found %s", route.Method)
 		}
 	})
