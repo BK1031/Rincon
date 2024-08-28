@@ -283,7 +283,7 @@ func TestCreateRouteLocal(t *testing.T) {
 			t.Errorf("Error when creating route: %v", err)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")
-		if route.Method != "GET,POST" {
+		if route.Method != "POST,GET" {
 			t.Errorf("Route method not updated, found %s", route.Method)
 		}
 	})
