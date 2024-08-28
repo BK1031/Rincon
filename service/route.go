@@ -6,6 +6,7 @@ import (
 	"rincon/database"
 	"rincon/model"
 	"rincon/utils"
+	"slices"
 	"strings"
 	"time"
 )
@@ -162,6 +163,7 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 	route.Method = strings.ToUpper(route.Method)
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	overlapRoutes := make([]model.Route, 0)
+	overlapServices := make([]string, 0)
 	existingRoutes := GetRoutesByRoute(route.Route)
 
 	for _, r := range existingRoutes {
@@ -177,7 +179,10 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 			return existingRoutes
 		}
 		if methodMap[m] != "" {
-			overlapRoutes = append(overlapRoutes, GetRouteByRouteAndService(route.Route, methodMap[m]))
+			if !slices.Contains(overlapServices, methodMap[m]) {
+				overlapServices = append(overlapServices, methodMap[m])
+				overlapRoutes = append(overlapRoutes, GetRouteByRouteAndService(route.Route, methodMap[m]))
+			}
 		}
 	}
 	return overlapRoutes
