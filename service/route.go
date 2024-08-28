@@ -108,21 +108,30 @@ func CreateRoute(route model.Route) error {
 	route.CreatedAt = time.Now()
 
 	overlapRoutes := GetOverlappingRoutes(route)
+	fmt.Printf("overlapRoutes: %+v\n", overlapRoutes)
 	if len(overlapRoutes) == 1 && overlapRoutes[0].ServiceName == route.ServiceName {
 		utils.SugarLogger.Debugf("stacking existing route %s for service %s", route.Route, route.ServiceName)
 		route.Method = StackMethods(route.Method, overlapRoutes[0].Method)
+		route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
 		DeleteRoute(overlapRoutes[0].ID)
 	} else if len(overlapRoutes) > 0 {
 		if config.OverwriteRoutes == "true" {
 			for _, r := range overlapRoutes {
 				if r.ServiceName == route.ServiceName {
 					route.Method = StackMethods(route.Method, r.Method)
+					route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
 				}
 				DeleteRoute(r.ID)
 			}
 		} else {
 			return fmt.Errorf("route with id %s overlaps with existing routes [%s]", route.ID, PrintRouteArray(overlapRoutes))
 		}
+	}
+	existingRoute := GetRouteByRouteAndService(route.Route, route.ServiceName)
+	if existingRoute.ID != "" {
+		route.Method = StackMethods(route.Method, existingRoute.Method)
+		route.ID = fmt.Sprintf("%s-[%s]", route.Route, route.Method)
+		DeleteRoute(existingRoute.ID)
 	}
 
 	if config.StorageMode == "sql" {
@@ -155,6 +164,7 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 	route.ServiceName = utils.NormalizeName(route.ServiceName)
 	overlapRoutes := make([]model.Route, 0)
 	existingRoutes := GetRoutesByRoute(route.Route)
+	fmt.Printf("existingRoutes: %+v\n", existingRoutes)
 
 	for _, r := range existingRoutes {
 		for _, m := range strings.Split(r.Method, ",") {
@@ -164,6 +174,7 @@ func GetOverlappingRoutes(route model.Route) []model.Route {
 			}
 		}
 	}
+	fmt.Printf("methodMap: %+v\n", methodMap)
 	for _, m := range strings.Split(route.Method, ",") {
 		if m == "*" {
 			return existingRoutes
