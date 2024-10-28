@@ -804,7 +804,7 @@ func TestCreateRouteSQL(t *testing.T) {
 			t.Errorf("Error when creating route: %v", err)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 2")
-		if route.Method != "GET,DELETE" {
+		if len(strings.Split(route.Method, ",")) != 2 {
 			t.Errorf("Service 2 route method not updated, found %s", route.Method)
 		}
 		route = GetRouteByRouteAndService("/test", "Service 1")

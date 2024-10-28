@@ -6,7 +6,7 @@ import (
 )
 
 func VerifyConfig() {
-	if config.Env == "" {
+	if config.Env != "DEV" {
 		config.Env = "PROD"
 		SugarLogger.Debugln("ENV is not set, defaulting to PROD")
 	}

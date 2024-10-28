@@ -15,6 +15,10 @@ func PrintStartupBanner() {
 	banner := color.New(color.Bold, color.FgHiBlue).PrintlnFunc()
 	banner(Banner)
 	version := color.New(color.Bold, color.FgBlue).PrintlnFunc()
-	version("Running v" + Version + " [ENV: " + Env + "]")
+	if Env == "DEV" {
+		version("Running v" + Version + " in Development mode.")
+	} else {
+		version("Running v" + Version + " in Production mode.")
+	}
 	println()
 }
