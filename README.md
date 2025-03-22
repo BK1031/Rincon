@@ -342,7 +342,25 @@ The generated route graph would look something like the following.
   <img alt="Rincon Route Graph" src="/assets/route-graph-light.png">
 </picture>
 
-Note that `/orgs` does not have a service attached to it so it will return an error when attempting to match that route.
+When `ENV` is set to `DEV`, the route graph will be printed on each match route request.
+
+```
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:234    Matching route  /rincon/services/123456/routes
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:263    Traversing graph with path "" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:277    Child path "" exists
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:263    Traversing graph with path "/rincon" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:277    Child path "rincon" exists
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:263    Traversing graph with path "/rincon/services" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.383-0700    DEBUG   service/route.go:277    Child path "services" exists
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:263    Traversing graph with path "/rincon/services/123456" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:270    Child path "123456" does not exist
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:263    Traversing graph with path "/rincon/services/*" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:270    Child path "*" does not exist
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:263    Traversing graph with path "/rincon/services/**" and route "/rincon/services/123456/routes"
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:274    Found all path wildcard (**)
+2025-03-22T00:07:37.386-0700    DEBUG   service/route.go:240    Matched to /rincon/services/**
+2025-03-22T00:07:37.386-0700    INFO    service/route.go:252    Matched route /rincon/services/123456/routes to /rincon/services/** for service rincon (557684)
+```
 
 ### Example
 
@@ -429,12 +447,12 @@ Sets whether Rincon should be running in production or development mode.
 The port that the Rincon API binds to.
 
 #### `SELF_ENDPOINT`
-***Default:** `http://localhost:[PORT]`*
+***Default:** `http://localhost:{PORT}`*
 
 The endpoint that the Rincon API is accessible at. Rincon uses this value for its initial self-registration.
 
 #### `SELF_HEALTH_CHECK`
-***Default:** `http://localhost:[PORT]/rincon/ping`*
+***Default:** `http://localhost:{PORT}/rincon/ping`*
 
 The endpoint that the Rincon API's health check is accessible at. Rincon uses this value for its initial self-registration.
 
@@ -498,7 +516,13 @@ The table name prefix that Rincon uses when creating tables, handy in case of ex
 
 ## API Endpoints
 
+
+
 ## Roadmap
+
+1. More load balancing options
+2. Support for Redis as storage layer
+3. Better kubernetes integration
 
 ## Contributing
 
