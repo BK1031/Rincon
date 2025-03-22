@@ -416,6 +416,62 @@ If clients want to implement their own form of load balancing, they can simply r
 
 ## Configuration
 
+Here are all the environment variables and their defaults to configure Rincon.
+
+#### `ENV` – Default: `PROD`
+Sets whether Rincon should be running in production or development mode.
+
+#### `PORT` – Default: `10311`
+The port that the Rincon API binds to.
+
+#### `SELF_ENDPOINT` – Default: `http://localhost:[PORT]`
+The endpoint that the Rincon API is accessible at. Rincon uses this value for its initial self-registration.
+
+#### `SELF_HEALTH_CHECK` – Default: `http://localhost:[PORT]/rincon/ping`
+The endpoint that the Rincon API's health check is accessible at. Rincon uses this value for its initial self-registration.
+
+#### `AUTH_USER` – Default: `admin`
+The username Rincon looks for as part of basic authentication in the `Authorization` headers of incoming requests.
+
+#### `AUTH_PASSWORD` – Default: `admin`
+The password Rincon looks for as part of basic authentication in the `Authorization` headers of incoming requests.
+
+#### `SERVICE_ID_LENGTH` – Default: `6`
+The length of the auto-generated service IDs. Note that this value must be at least 4.
+
+#### `STORAGE_MODE` – Default: `local`
+This sets where Rincon stores all its registration info. Must be either `local` or `sql`. Support for Redis coming soon!
+
+#### `OVERWRITE_ROUTES` – Default: `false`
+This flag determines whether Rincon will overwrite existing routes when a new registration arrives from a different service than the existing route. See the Conflicting Route Registration section for more information.
+
+#### `HEARTBEAT_TYPE` – Default: `server`
+This determines whether Rincon will ping registered services or expect the services to ping Rincon. Must be set to either `server` or `client`.
+
+#### `HEARTBEAT_INTERVAL` – Default: `10`
+The time between hearbeat pings sent by Rincon. If `HEARTBEAT_TYPE` is set to `client`, then this determines how long after a ping that Rincon considers that service inactive.
+
+#### `DB_DRIVER`
+Which database engine to use when `STORAGE_MODE` is set to `sql`. Must be either `mysql` or `postgres`.
+
+#### `DB_HOST`
+Database hostname when `STORAGE_MODE` is set to `sql`.
+
+#### `DB_PORT`
+Database port when `STORAGE_MODE` is set to `sql`.
+
+#### `DB_NAME`
+Database name when `STORAGE_MODE` is set to `sql`.
+
+#### `DB_USER`
+Database user when `STORAGE_MODE` is set to `sql`.
+
+#### `DB_PASSWORD`
+Database password when `STORAGE_MODE` is set to `sql`.
+
+#### `DB_TABLE_PREFIX` – Default: `rin_`
+The table name prefix that Rincon uses when creating tables, handy in case of existing table conflicts.
+
 ## API Endpoints
 
 ## Roadmap
