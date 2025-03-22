@@ -410,6 +410,10 @@ This is because `New York` was already registered to handle all methods (based o
 
 ## Load Balancing
 
+Rincon is able to load balance between multiple instances of the same service based on the service name. Currently only random selection is supported (see [`RandomSelector`](/service/balancer.go:20)).
+
+If clients want to implement their own form of load balancing, they can simply request all the registrations for the service name that was returned from their original match route request.
+
 ## Configuration
 
 ## API Endpoints
