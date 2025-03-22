@@ -148,8 +148,8 @@ func RegisterSelf() {
 	service := model.Service{
 		Name:        "Rincon",
 		Version:     config.Version,
-		Endpoint:    "http://localhost:" + config.Port,
-		HealthCheck: "http://localhost:" + config.Port + "/rincon/ping",
+		Endpoint:    config.SelfEndpoint,
+		HealthCheck: config.SelfHealthCheck,
 		UpdatedAt:   time.Now(),
 		CreatedAt:   time.Now(),
 	}
