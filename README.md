@@ -418,7 +418,9 @@ If clients want to implement their own form of load balancing, they can simply r
 
 Here are all the environment variables and their defaults to configure Rincon.
 
-#### `ENV` – Default: `PROD`
+#### `ENV`
+***Default:** `PROD`*
+
 Sets whether Rincon should be running in production or development mode.
 
 #### `PORT` – Default: `10311`
