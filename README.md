@@ -516,7 +516,7 @@ The table name prefix that Rincon uses when creating tables, handy in case of ex
 
 ## API Endpoints
 
-
+Check out [`openapi.yaml`](openapi.yaml) to find documentation for the Rincon REST API.
 
 ## Roadmap
 
