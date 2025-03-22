@@ -14,6 +14,14 @@ func VerifyConfig() {
 		config.Port = "10311"
 		SugarLogger.Debugln("PORT is not set, defaulting to 10311")
 	}
+	if config.SelfEndpoint == "" {
+		config.SelfEndpoint = "http://localhost:" + config.Port
+		SugarLogger.Debugln("SELF_ENDPOINT is not set, defaulting to http://localhost:" + config.Port)
+	}
+	if config.SelfHealthCheck == "" {
+		config.SelfHealthCheck = "http://localhost:" + config.Port + "/rincon/ping"
+		SugarLogger.Debugln("SELF_HEALTH_CHECK is not set, defaulting to http://localhost:" + config.Port + "/rincon/ping")
+	}
 	if config.AuthUser == "" {
 		config.AuthUser = "admin"
 		SugarLogger.Debugln("AUTH_USER is not set, defaulting to admin")

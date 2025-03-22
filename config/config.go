@@ -8,6 +8,9 @@ var Version = "2.1.1"
 var Env = os.Getenv("ENV")
 var Port = os.Getenv("PORT")
 
+var SelfEndpoint = os.Getenv("SELF_ENDPOINT")
+var SelfHealthCheck = os.Getenv("SELF_HEALTH_CHECK")
+
 var AuthUser = os.Getenv("AUTH_USER")
 var AuthPassword = os.Getenv("AUTH_PASSWORD")
 

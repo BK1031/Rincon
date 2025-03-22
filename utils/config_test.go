@@ -16,6 +16,12 @@ func TestVerifyConfig(t *testing.T) {
 		if config.Port != "10311" {
 			t.Errorf("Port is not set to 10311")
 		}
+		if config.SelfEndpoint != "http://localhost:10311" {
+			t.Errorf("SelfEndpoint is not set to http://localhost:10311")
+		}
+		if config.SelfHealthCheck != "http://localhost:10311/rincon/ping" {
+			t.Errorf("SelfHealthCheck is not set to http://localhost:10311/rincon/ping")
+		}
 		if config.AuthUser != "admin" {
 			t.Errorf("AuthUser is not set to admin")
 		}
