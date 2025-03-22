@@ -1,0 +1,594 @@
+openapi: 3.0.3
+info:
+  title: Rincon
+  description: 'A simple, secure, and lightweight cloud-native service registry.'
+  version: 2.1.2
+  contact:
+    name: Bharat Kathi
+    email: bharat1031@gmail.com
+servers:
+  - url: http://localhost:10311
+    description: ''
+security:
+  - BasicAuth: []
+paths:
+  /rincon/ping:
+    get:
+      summary: Ping
+      description: ''
+      operationId: 2188b25c-be41-414d-a1b5-d96784873cbb
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Rincon v2.1.2 is online!
+                  routes:
+                    type: integer
+                    format: int64
+                    example: 6
+                  services:
+                    type: integer
+                    format: int64
+                    example: 2
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '62'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:56:47 GMT
+      security: []
+  /rincon/services:
+    get:
+      summary: Get All Services
+      description: ''
+      operationId: 4f5b78d3-9b8e-41ee-98a8-5d6eaebdcd92
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      example: 941815
+                    name:
+                      type: string
+                      example: rincon
+                    version:
+                      type: string
+                      example: 2.1.1
+                    endpoint:
+                      type: string
+                      example: http://localhost:10311
+                    health_check:
+                      type: string
+                      example: http://localhost:10311/rincon/ping
+                    updated_at:
+                      type: string
+                      example: '2024-10-28T10:09:40.703258671-07:00'
+                    created_at:
+                      type: string
+                      example: '2024-10-28T10:09:40.703258754-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '239'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Mon, 28 Oct 2024 17:29:41 GMT
+      security: []
+    post:
+      summary: Create Service
+      description: ''
+      operationId: c52d2034-b67b-4c1a-b6cd-e8042c63af60
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endpoint:
+                  type: string
+                  example: http://localhost:2000
+                name:
+                  type: string
+                  example: San Francisco
+                health_check:
+                  type: string
+                  example: http://localhost:3000/health
+                version:
+                  type: string
+                  example: 1.0.0
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 944852
+                  name:
+                    type: string
+                    example: san_francisco
+                  version:
+                    type: string
+                    example: 1.0.0
+                  endpoint:
+                    type: string
+                    example: http://localhost:2000
+                  health_check:
+                    type: string
+                    example: http://localhost:3000/health
+                  updated_at:
+                    type: string
+                    example: '2025-03-21T23:56:35.972516-07:00'
+                  created_at:
+                    type: string
+                    example: '2025-03-21T23:52:59.034962-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '231'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:56:35 GMT
+      security: []
+  /services/rincon/{id}:
+    get:
+      summary: Get Service
+      description: ''
+      operationId: cb1faf22-038e-4746-a9e0-c1f867fd1cb6
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            default: rincon
+            description: ID or Name of registered service
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      example: 941815
+                    name:
+                      type: string
+                      example: rincon
+                    version:
+                      type: string
+                      example: 2.1.1
+                    endpoint:
+                      type: string
+                      example: http://localhost:10311
+                    health_check:
+                      type: string
+                      example: http://localhost:10311/rincon/ping
+                    updated_at:
+                      type: string
+                      example: '2024-10-28T10:09:40.703258671-07:00'
+                    created_at:
+                      type: string
+                      example: '2024-10-28T10:09:40.703258754-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '239'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Mon, 28 Oct 2024 17:24:13 GMT
+      security: []
+  /rincon/services/{id}:
+    delete:
+      summary: Remove Service
+      description: ''
+      operationId: 50a1d0bb-465e-4da3-a014-5aa306639ed1
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            default: '604684'
+            description: ID of service to remove
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Service with id 604684 removed
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '44'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:43:54 GMT
+      security: []
+  /rincon/routes:
+    get:
+      summary: Get Route
+      description: ''
+      operationId: 8fb8f557-259e-4ff2-acfd-32bb3e51acd5
+      parameters:
+        - name: method
+          in: query
+          schema:
+            type: string
+            default: ''
+            description: ''
+        - name: route
+          in: query
+          schema:
+            type: string
+            default: ''
+            description: ''
+        - name: service
+          in: query
+          schema:
+            type: string
+            default: ''
+            description: ''
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: /rincon/ping-[*]
+                    route:
+                      type: string
+                      example: /rincon/ping
+                    method:
+                      type: string
+                      example: '*'
+                    service_name:
+                      type: string
+                      example: rincon
+                    created_at:
+                      type: string
+                      example: '2025-03-21T23:41:28.807812-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '843'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:42:49 GMT
+      security: []
+    post:
+      summary: Create Route
+      description: ''
+      operationId: 0b98260b-cc46-4916-aac3-ec317ef17346
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                route:
+                  type: string
+                  example: /test
+                service_name:
+                  type: string
+                  example: San Francisco
+                method:
+                  type: string
+                  example: '*'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: /test-[*]
+                  route:
+                    type: string
+                    example: /test
+                  method:
+                    type: string
+                    example: '*'
+                  service_name:
+                    type: string
+                    example: san_francisco
+                  created_at:
+                    type: string
+                    example: '2024-10-28T10:25:27.576288012-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '129'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Mon, 28 Oct 2024 17:25:27 GMT
+      security: []
+  /rincon/services/{id}/routes:
+    get:
+      summary: Get Routes For Service
+      description: ''
+      operationId: 7657a466-de5b-481c-9529-b49e7937feb7
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            default: rincon
+            description: ID or Name of registered service
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: /rincon/ping-[*]
+                    route:
+                      type: string
+                      example: /rincon/ping
+                    method:
+                      type: string
+                      example: '*'
+                    service_name:
+                      type: string
+                      example: rincon
+                    created_at:
+                      type: string
+                      example: '2025-03-21T23:41:28.807812-07:00'
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '843'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:43:14 GMT
+      security: []
+  /rincon/match:
+    get:
+      summary: Match Route
+      description: ''
+      operationId: d5931715-4cff-4401-8b0e-5e16fbb41a71
+      parameters:
+        - name: method
+          in: query
+          schema:
+            type: string
+            default: GET
+            description: ''
+          required: true
+        - name: route
+          in: query
+          schema:
+            type: string
+            default: ''
+            description: ''
+          required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 557684
+                  name:
+                    type: string
+                    example: rincon
+                  version:
+                    type: string
+                    example: 2.1.1
+                  endpoint:
+                    type: string
+                    example: http://localhost:10311
+                  health_check:
+                    type: string
+                    example: http://localhost:10311/rincon/ping
+                  updated_at:
+                    type: string
+                    example: '2025-03-21T23:41:28.807738-07:00'
+                  created_at:
+                    type: string
+                    example: '2025-03-21T23:41:28.807738-07:00'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No route [GET] /rincon/fake/route found
+          headers:
+            Content-Type:
+              description: ''
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              description: ''
+              schema:
+                type: string
+                example: '231'
+            Connection:
+              description: ''
+              schema:
+                type: string
+                example: close
+            Date:
+              description: ''
+              schema:
+                type: string
+                example: Sat, 22 Mar 2025 06:53:39 GMT
+      security: []
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
