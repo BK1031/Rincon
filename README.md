@@ -328,8 +328,21 @@ As an example, let's say we have the following route registrations.
 ```
 New York: /users
 New York: /users/*
+San Francisco: /users/stats
 San Francsico: /users/*/notifications
+Los Angeles: /orgs/stats
+Santa Barbara: /orgs/**
 ```
+
+The generated route graph would look something like the following.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="/assets/route-graph-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="/assets/route-graph-light.png">
+  <img alt="Rincon Route Graph" src="/assets/route-graph-light.png">
+</picture>
+
+Note that `/orgs` does not have a service attached to it so it will return an error when attempting to match that route.
 
 ### Example
 
