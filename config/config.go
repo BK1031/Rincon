@@ -34,6 +34,12 @@ var HeartbeatType = os.Getenv("HEARTBEAT_TYPE")
 // HeartbeatInterval is the interval at which heartbeats should be sent.
 var HeartbeatInterval = os.Getenv("HEARTBEAT_INTERVAL")
 
+// HeartbeatRetryCount is the number of retry attempts before removing a service.
+var HeartbeatRetryCount = os.Getenv("HEARTBEAT_RETRY_COUNT")
+
+// HeartbeatRetryBackoff is the backoff duration in milliseconds between retry attempts.
+var HeartbeatRetryBackoff = os.Getenv("HEARTBEAT_RETRY_BACKOFF")
+
 // DatabaseDriver is the driver to use for the database.
 // It can be "mysql" or "postgres".
 var DatabaseDriver = os.Getenv("DB_DRIVER")

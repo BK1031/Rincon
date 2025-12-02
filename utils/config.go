@@ -61,6 +61,22 @@ func VerifyConfig() {
 		config.HeartbeatInterval = "10"
 		SugarLogger.Debugln("HEARTBEAT_INTERVAL is not set, defaulting to 10")
 	}
+	if config.HeartbeatRetryCount == "" {
+		config.HeartbeatRetryCount = "3"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_COUNT is not set, defaulting to 3")
+	}
+	if i, err := strconv.Atoi(config.HeartbeatRetryCount); i < 0 || err != nil {
+		config.HeartbeatRetryCount = "3"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_COUNT is invalid, defaulting to 3")
+	}
+	if config.HeartbeatRetryBackoff == "" {
+		config.HeartbeatRetryBackoff = "5000"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is not set, defaulting to 5000ms")
+	}
+	if i, err := strconv.Atoi(config.HeartbeatRetryBackoff); i < 0 || err != nil {
+		config.HeartbeatRetryBackoff = "5000"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is invalid, defaulting to 5000ms")
+	}
 	if config.DatabaseTablePrefix == "" {
 		config.DatabaseTablePrefix = "rin_"
 		SugarLogger.Debugln("DB_TABLE_PREFIX is not set, defaulting to rin_")
