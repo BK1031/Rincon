@@ -70,12 +70,12 @@ func VerifyConfig() {
 		SugarLogger.Debugln("HEARTBEAT_RETRY_COUNT is invalid, defaulting to 3")
 	}
 	if config.HeartbeatRetryBackoff == "" {
-		config.HeartbeatRetryBackoff = "1000"
-		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is not set, defaulting to 1000ms")
+		config.HeartbeatRetryBackoff = "5000"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is not set, defaulting to 5000ms")
 	}
 	if i, err := strconv.Atoi(config.HeartbeatRetryBackoff); i < 0 || err != nil {
-		config.HeartbeatRetryBackoff = "1000"
-		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is invalid, defaulting to 1000ms")
+		config.HeartbeatRetryBackoff = "5000"
+		SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is invalid, defaulting to 5000ms")
 	}
 	if config.DatabaseTablePrefix == "" {
 		config.DatabaseTablePrefix = "rin_"

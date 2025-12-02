@@ -37,8 +37,8 @@ func TestVerifyConfig(t *testing.T) {
 		if config.HeartbeatRetryCount != "3" {
 			t.Errorf("HeartbeatRetryCount is not set to 3")
 		}
-		if config.HeartbeatRetryBackoff != "1000" {
-			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
+		if config.HeartbeatRetryBackoff != "5000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 5000")
 		}
 	})
 	t.Run("Test Service ID Length", func(t *testing.T) {
@@ -92,15 +92,15 @@ func TestVerifyConfig(t *testing.T) {
 	t.Run("Test Invalid Heartbeat Retry Backoff", func(t *testing.T) {
 		config.HeartbeatRetryBackoff = "invalid"
 		VerifyConfig()
-		if config.HeartbeatRetryBackoff != "1000" {
-			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
+		if config.HeartbeatRetryBackoff != "5000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 5000")
 		}
 	})
 	t.Run("Test Negative Heartbeat Retry Backoff", func(t *testing.T) {
 		config.HeartbeatRetryBackoff = "-500"
 		VerifyConfig()
-		if config.HeartbeatRetryBackoff != "1000" {
-			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
+		if config.HeartbeatRetryBackoff != "5000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 5000")
 		}
 	})
 }

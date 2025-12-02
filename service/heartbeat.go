@@ -43,8 +43,8 @@ func ServerHeartbeat(interval int) {
 	}
 	retryBackoff, err := strconv.Atoi(config.HeartbeatRetryBackoff)
 	if err != nil {
-		utils.SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is invalid, defaulting to 1000ms")
-		retryBackoff = 1000
+		utils.SugarLogger.Debugln("HEARTBEAT_RETRY_BACKOFF is invalid, defaulting to 5000ms")
+		retryBackoff = 5000
 	}
 
 	for _, s := range GetAllServices() {
