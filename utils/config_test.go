@@ -34,6 +34,12 @@ func TestVerifyConfig(t *testing.T) {
 		if config.StorageMode != "local" {
 			t.Errorf("StorageMode is not set to local")
 		}
+		if config.HeartbeatRetryCount != "3" {
+			t.Errorf("HeartbeatRetryCount is not set to 3")
+		}
+		if config.HeartbeatRetryBackoff != "1000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
+		}
 	})
 	t.Run("Test Service ID Length", func(t *testing.T) {
 		config.ServiceIDLength = "3"
@@ -67,6 +73,34 @@ func TestVerifyConfig(t *testing.T) {
 		VerifyConfig()
 		if config.StorageMode != "redis+sql" {
 			t.Errorf("StorageMode is not set to redis+sql")
+		}
+	})
+	t.Run("Test Invalid Heartbeat Retry Count", func(t *testing.T) {
+		config.HeartbeatRetryCount = "invalid"
+		VerifyConfig()
+		if config.HeartbeatRetryCount != "3" {
+			t.Errorf("HeartbeatRetryCount is not set to 3")
+		}
+	})
+	t.Run("Test Negative Heartbeat Retry Count", func(t *testing.T) {
+		config.HeartbeatRetryCount = "-1"
+		VerifyConfig()
+		if config.HeartbeatRetryCount != "3" {
+			t.Errorf("HeartbeatRetryCount is not set to 3")
+		}
+	})
+	t.Run("Test Invalid Heartbeat Retry Backoff", func(t *testing.T) {
+		config.HeartbeatRetryBackoff = "invalid"
+		VerifyConfig()
+		if config.HeartbeatRetryBackoff != "1000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
+		}
+	})
+	t.Run("Test Negative Heartbeat Retry Backoff", func(t *testing.T) {
+		config.HeartbeatRetryBackoff = "-500"
+		VerifyConfig()
+		if config.HeartbeatRetryBackoff != "1000" {
+			t.Errorf("HeartbeatRetryBackoff is not set to 1000")
 		}
 	})
 }

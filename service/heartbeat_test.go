@@ -66,4 +66,43 @@ func TestInitializeHeartbeat(t *testing.T) {
 		})
 		ServerHeartbeat(1)
 	})
+	t.Run("Test Server Heartbeat With Retry", func(t *testing.T) {
+		config.HeartbeatType = "server"
+		config.HeartbeatRetryCount = "2"
+		config.HeartbeatRetryBackoff = "100"
+		CreateService(model.Service{
+			Name:        "RetryTest",
+			Version:     "1.0.0",
+			Endpoint:    "http://localhost:19999",
+			HealthCheck: "http://localhost:19999/health",
+		})
+		ServerHeartbeat(1)
+	})
+	t.Run("Test Server Heartbeat With Invalid Retry Config", func(t *testing.T) {
+		config.HeartbeatType = "server"
+		config.HeartbeatRetryCount = "invalid"
+		config.HeartbeatRetryBackoff = "invalid"
+		CreateService(model.Service{
+			Name:        "InvalidRetryTest",
+			Version:     "1.0.0",
+			Endpoint:    "http://localhost:19998",
+			HealthCheck: "http://localhost:19998/health",
+		})
+		ServerHeartbeat(1)
+		// Reset to valid values
+		config.HeartbeatRetryCount = "3"
+		config.HeartbeatRetryBackoff = "1000"
+	})
+	t.Run("Test Server Heartbeat With Zero Retries", func(t *testing.T) {
+		config.HeartbeatType = "server"
+		config.HeartbeatRetryCount = "0"
+		config.HeartbeatRetryBackoff = "100"
+		CreateService(model.Service{
+			Name:        "ZeroRetryTest",
+			Version:     "1.0.0",
+			Endpoint:    "http://localhost:19997",
+			HealthCheck: "http://localhost:19997/health",
+		})
+		ServerHeartbeat(1)
+	})
 }

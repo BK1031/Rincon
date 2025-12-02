@@ -491,6 +491,16 @@ This determines whether Rincon will ping registered services or expect the servi
 
 The time between hearbeat pings sent by Rincon. If `HEARTBEAT_TYPE` is set to `client`, then this determines how long after a ping that Rincon considers that service inactive.
 
+#### `HEARTBEAT_RETRY_COUNT`
+***Default:** `3`*
+
+The number of retry attempts Rincon will make when a heartbeat ping fails before removing a service from the registry. This is useful for services that may take some time to become ready after registration. Only applies when `HEARTBEAT_TYPE` is set to `server`.
+
+#### `HEARTBEAT_RETRY_BACKOFF`
+***Default:** `1000`*
+
+The backoff duration in milliseconds between heartbeat retry attempts. This allows services time to recover before the next retry. Only applies when `HEARTBEAT_TYPE` is set to `server`.
+
 #### `DB_DRIVER`
 No default value. Which database engine to use when `STORAGE_MODE` is set to `sql`. Must be either `mysql` or `postgres`.
 
