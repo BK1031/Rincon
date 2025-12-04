@@ -1,10 +1,10 @@
 package config
 
-import (
+Bimport (
 	"os"
 )
 
-var Version = "2.1.2"
+var Version = "2.2.0"
 var Env = os.Getenv("ENV")
 var Port = os.Getenv("PORT")
 
