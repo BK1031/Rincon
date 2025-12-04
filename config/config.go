@@ -1,6 +1,6 @@
 package config
 
-Bimport (
+import (
 	"os"
 )
 
